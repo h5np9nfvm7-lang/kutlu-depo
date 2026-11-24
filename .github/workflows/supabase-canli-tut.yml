@@ -1,0 +1,42 @@
+# Supabase ücretsiz planı, bir hafta hiç kullanılmayan projeleri duraklatır.
+# Bu görev her gün veritabanına küçük bir okuma isteği gönderir (hiçbir şeyi değiştirmez).
+#
+# GitHub, 60 gün hiç değişiklik olmayan depolarda zamanlanmış görevleri durdurur.
+# Bunu önlemek için görev her ayın 1'inde .github/son-kontrol.txt dosyasına
+# tarih yazar. Bu dosyanın sitede hiçbir etkisi yoktur.
+name: Supabase'i aktif tut
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # her gün 09:17 (Türkiye saati)
+  workflow_dispatch: {}     # Actions sekmesinden elle de çalıştırılabilir
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Veritabanına okuma isteği gönder
+        run: |
+          URL="https://zcfdiskphrmwdxqnexio.supabase.co/rest/v1/ilanlar?select=id&limit=1"
+          KEY="sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb"
+          KOD=$(curl -s -o /dev/null -w "%{http_code}" "$URL" -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+          echo "Supabase yanıt kodu: $KOD"
+          [ "$KOD" = "200" ]
+
+      - name: Depoyu aktif tut (ayda bir)
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.event.schedule, '17 6') && format('{0}', github.run_attempt) == '1'
+        run: |
+          if [ "$(date -u +%d)" != "01" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Bugün ayın 1'i değil, atlanıyor."; exit 0
+          fi
+          git clone --depth 1 "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" depo
+          cd depo
+          date -u +"Son otomatik kontrol: %Y-%m-%d %H:%M UTC" > .github/son-kontrol.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/son-kontrol.txt
+          git commit -m "Otomatik aylık kontrol" || exit 0
+          git push
