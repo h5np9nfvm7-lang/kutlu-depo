@@ -1,66 +1,105 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İletişim | Bizim Emlak Osmaniye</title>
+<meta name="description" content="Bizim Emlak iletişim bilgileri, adres, çalışma saatleri ve iletişim formu. Mülkünüzü satmak veya kiralamak için bize ulaşın.">
+<meta property="og:title" content="İletişim | Bizim Emlak">
+<meta property="og:image" content="images/logo.png">
+<meta name="theme-color" content="#111111">
+<link rel="icon" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="site-ust"></header>
 
-  <!-- İletişim Kartları -->
-  <div style="max-width: 1200px; margin: 2rem auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-    <div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-      <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1rem;">İletişim Bilgileri</h3>
-      <p style="color: var(--renk-metin); font-size: 0.9rem; line-height: 1.8;">
-        <strong>Adres:</strong> İstiklal, Dr. Sadık Ahmet Cad. No : 57 D:C, 80020 Osmaniye Merkez/Osmaniye<br>
-        <strong>Telefon:</strong> <a href="tel:03288120000" style="color: var(--renk-ana); text-decoration: none;">0328 812 00 00</a><br>
-        <strong>WhatsApp:</strong> <a href="https://wa.me/03288120000" style="color: var(--renk-ana); text-decoration: none;" target="_blank">0328 812 00 00</a>
-      </p>
+<main>
+  <section class="sayfa-bas">
+    <div class="kap">
+      <div class="yol"><a href="index.html">Ana Sayfa</a> / İletişim</div>
+      <h1>İletişim</h1>
+      <p>Sorularınız için arayın, yazın ya da ofisimize uğrayın.</p>
     </div>
-    <div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-      <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1rem;">OpenStreetMap</h3>
-      <iframe style="width: 100%; height: 200px; border: none;"
-            referrerpolicy="no-referrer-no-opener"
-            src="https://www.openstreetmap.org/export/embed.html?bbox=32.870-3.18&layer=mapnik&marker=36.997-33.72"></iframe>
-    </div>
-    <div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-      <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1rem;">Çalışma Saatleri</h3>
-      <p style="color: var(--renk-metin); line-height: 1.8;">
-        Pazartesi-Cuma: 09:00 - 18:00<br>
-        Cumartesi: 09:00 - 14:00<br>
-        Pazar: Kapalı
-      </p>
-    </div>
-  </div>
+  </section>
 
-  <!-- İletişim Formu -->
-  <div style="max-width: 1200px; margin: 2rem auto; background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); font-family: var(--font-metin);">
-    <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem;">İletişim Formu</h3>
-    <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;"
-          onsubmit="if(!document.getElementById('ad').value || !document.getElementById('telefon').value || !document.getElementById('eposta').value || !document.getElementById('konu').value) { alert('Lütfen tüm alanları doldurun.'); return false; } else { window.open('https://wa.me/03288120000?text=Ad: ' + document.getElementById('ad').value + '\nTelefon: ' + document.getElementById('telefon').value + '\nE-posta: ' + document.getElementById('eposta').value + '\nKonu: ' + document.getElementById('konu').value + '\nMesaj: ' + document.getElementById('mesaj').value, '_blank'); }">
-      </form>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-        <label>Ad *</label><input type="text" id="ad" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);"><br>
-        <label>Telefon *</label><input type="text" id="telefon" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);"><br>
-        <label>E-posta *</label><input type="email" id="eposta" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);"><br>
-        <label>Konu *</label>
-        <select id="konu" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);">
-          <option value="">Konu Seçin</option>
-          <option value="Ev almak">Ev almak</option>
-          <option value="Satmak">Satmak</option>
-          <option value="Kiralamak">Kiralamak</option>
-          <option value="Kiraya vermek">Kiraya vermek</option>
-          <option value="Değerleme">Değerleme</option>
-        </select>
+  <section class="bolum" style="padding-top:36px">
+    <div class="kap">
+      <div class="iletisim-izgara" id="iletisim-kartlar"></div>
+    </div>
+  </section>
+
+  <section class="bolum bolum-gri">
+    <div class="kap iki-kolon">
+      <div class="kart-blok" style="margin:0">
+        <h2>Çalışma Saatleri <span id="acik-durum"></span></h2>
+        <table class="saat-tablo" id="saatler"></table>
+        <p id="saat-notu" style="font-size:.9rem;color:var(--metin-soluk);margin:12px 0 0"></p>
       </div>
-      <label>Mesaj *</label><textarea id="mesaj" rows="4" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);"></textarea><br>
-      <button type="submit" style="width: 100%; background: var(--renk-ana); color: var(--renk-beyaz); border: none; padding: 0.7rem; border-radius: 4px; font-family: var(--font-baslik); font-size: 0.9rem; cursor: pointer;">Gönder</button>
-    </form>
-  </div>
+      <div class="harita-kutu" id="ofis-harita" style="min-height:360px;background:#fff"></div>
+    </div>
+  </section>
 
-  <!-- Mülkünüzü Bize Verin Formu -->
-  <div style="max-width: 1200px; margin: 2rem auto; background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); font-family: var(--font-metin);">
-    <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem;">Mülkünüzü Bize Verin</h3>
-    <form style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;"
-          onsubmit="if(!document.getElementById('mulk_tipi').value || !document.getElementById('konum').value || !document.getElementById('m2').value || !document.getElementById('oda').value || !document.getElementById('bekcek_fiyat').value) { alert('Lütfen tüm alanları doldurun.'); return false; } else { window.open('https://wa.me/03288120000?text=Mülk Tipi: ' + document.getElementById('mulk_tipi').value + '\nKonum: ' + document.getElementById('konum').value + '\nM²: ' + document.getElementById('m2').value + '\nOda: ' + document.getElementById('oda').value + '\nBeklenen Fiyat: ' + document.getElementById('bekcek_fiyat').value, '_blank'); }">
-      </form>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-        <label>Mülk Tipi</label><input type="text" id="mulk_tipi" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" placeholder="Satılık/Kiralık"><br>
-        <label>Konum</label><input type="text" id="konum" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" placeholder="İstiklal, Dr. Sadık Ahmet Cad. No : 57 D:C..."></div>
-        <label>M²</label><input type="number" id="m2" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" placeholder="Metrekare"><br>
-        <label>Oda</label><input type="number" id="oda" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" placeholder="Oda Sayısı"><br>
-        <label>Beklenen Fiyat</label><input type="text" id="bekcek_fiyat" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" placeholder="Örnek: 2.500.000 ₺"></div>
-    </form>
-  </div>
+  <section class="bolum">
+    <div class="kap iki-kolon">
+      <div class="kart-blok" style="margin:0">
+        <h2>Bize Yazın</h2>
+        <form id="iletisim-form" novalidate>
+          <div class="form-izgara">
+            <label class="alan"><span>Adınız Soyadınız *</span><input type="text" name="ad" required maxlength="100" autocomplete="name"></label>
+            <label class="alan"><span>Telefon *</span><input type="tel" name="tel" required maxlength="30" autocomplete="tel" placeholder="05xx xxx xx xx"></label>
+            <label class="alan"><span>E-posta</span><input type="email" name="eposta" maxlength="120" autocomplete="email"></label>
+            <label class="alan"><span>Konu</span>
+              <select name="konu">
+                <option>Ev almak istiyorum</option><option>Ev satmak istiyorum</option>
+                <option>Ev kiralamak istiyorum</option><option>Evimi kiraya vermek istiyorum</option>
+                <option>Gayrimenkul değerleme</option><option>Diğer</option>
+              </select>
+            </label>
+            <label class="alan tam"><span>Mesajınız *</span><textarea name="mesaj" required maxlength="3000"></textarea></label>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button type="submit" class="btn btn-kirmizi">Mesajı Gönder</button>
+            <button type="button" class="btn btn-wp gizli" data-wp-form="iletisim-form">WhatsApp ile Gönder</button>
+          </div>
+          <div class="sonuc" aria-live="polite"></div>
+        </form>
+      </div>
+
+      <div class="kart-blok" style="margin:0" id="mulk-formu">
+        <h2>Mülkünüzü Bize Verin</h2>
+        <p style="color:var(--metin-soluk)">Satmak veya kiraya vermek istediğiniz mülkün bilgilerini bırakın, ücretsiz değerleme için sizi arayalım.</p>
+        <form id="mulk-form" novalidate>
+          <div class="form-izgara">
+            <label class="alan"><span>Adınız Soyadınız *</span><input type="text" name="ad" required maxlength="100" autocomplete="name"></label>
+            <label class="alan"><span>Telefon *</span><input type="tel" name="tel" required maxlength="30" autocomplete="tel"></label>
+            <label class="alan"><span>İşlem</span><select name="islem"><option>Satmak istiyorum</option><option>Kiraya vermek istiyorum</option></select></label>
+            <label class="alan"><span>Mülk Tipi</span><select name="tip"><option>Daire</option><option>Villa</option><option>Müstakil Ev</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option><option>Diğer</option></select></label>
+            <label class="alan"><span>İlçe / Mahalle</span><input type="text" name="konum" maxlength="100"></label>
+            <label class="alan"><span>Metrekare</span><input type="number" name="m2" min="0" inputmode="numeric"></label>
+            <label class="alan"><span>Oda Sayısı</span><input type="text" name="oda" maxlength="10" placeholder="Örn. 3+1"></label>
+            <label class="alan"><span>Beklediğiniz Fiyat (TL)</span><input type="text" name="fiyat" maxlength="30" inputmode="numeric"></label>
+            <label class="alan tam"><span>Eklemek istedikleriniz</span><textarea name="not" maxlength="1500" style="min-height:80px"></textarea></label>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button type="submit" class="btn btn-siyah">Değerleme İste</button>
+            <button type="button" class="btn btn-wp gizli" data-wp-form="mulk-form">WhatsApp ile Gönder</button>
+          </div>
+          <div class="sonuc" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="site-alt"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/hesap.js"></script>
+<script src="js/iletisim.js"></script>
+</body>
+</html>

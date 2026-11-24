@@ -1,0 +1,530 @@
+/* ==========================================================
+   BİZİM EMLAK - YÖNETİM PANELİ
+   ========================================================== */
+(function () {
+  'use strict';
+  const { $, $$, esc, ikon } = BE;
+  const H = window.BE_HESAP;
+  const db = BE.db;
+  const BUCKET = window.BE_CONFIG.FOTO_BUCKET;
+
+  let ilanlar = [], mesajlar = [], ayarlar = null, ayarKayitli = null;
+  const kopya = (o) => JSON.parse(JSON.stringify(o));
+  let duzenlenen = null;           // düzenlenen ilan (yeni ise null)
+  let fotolar = [];                // formdaki fotoğraf adresleri
+  let silinecekFotolar = [];       // kaydedince depodan silinecek
+  let etiketler = [];
+  let kirli = false;               // kaydedilmemiş değişiklik var mı
+  let harita = null, isaret = null;
+
+  /* ---------- Onay penceresi ---------- */
+  function onayla(baslik, metin, evetYazi = 'Evet') {
+    return new Promise((coz) => {
+      $('#modal-baslik').textContent = baslik; $('#modal-metin').textContent = metin; $('#modal-evet').textContent = evetYazi;
+      $('#modal').classList.remove('gizli'); $('#modal-hayir').focus();
+      const bitir = (s) => { $('#modal').classList.add('gizli'); $('#modal-evet').onclick = $('#modal-hayir').onclick = null; document.removeEventListener('keydown', tus); coz(s); };
+      const tus = (e) => { if (e.key === 'Escape') bitir(false); };
+      document.addEventListener('keydown', tus);
+      $('#modal-evet').onclick = () => bitir(true);
+      $('#modal-hayir').onclick = () => bitir(false);
+    });
+  }
+  const hataMetni = (e) => {
+    const m = (e && (e.message || e.error_description || e.msg)) || String(e);
+    if (/Invalid login/i.test(m)) return 'E-posta veya şifre hatalı.';
+    if (/row-level security|permission denied/i.test(m)) return 'Yetki hatası: Bu hesap yönetici olarak tanımlı değil ya da SQL kurulum dosyası çalıştırılmamış.';
+    if (/Failed to fetch|NetworkError/i.test(m)) return 'İnternet bağlantısı veya Supabase\'e ulaşılamıyor.';
+    if (/Bucket not found/i.test(m)) return 'Fotoğraf deposu bulunamadı. SQL kurulum dosyasını çalıştırın.';
+    return m;
+  };
+
+  /* ---------- Giriş ---------- */
+  async function basla() {
+    if (!db) {
+      $('#yukleniyor').innerHTML = '<div class="giris-kutu"><h2>Bağlantı kurulamadı</h2><p>Supabase kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin. Sorun devam ederse js/config.js içindeki adres ve anahtarı kontrol edin.</p></div>';
+      return;
+    }
+    const { data } = await db.auth.getSession();
+    if (data.session) await girisYapildi(data.session.user);
+    else girisGoster();
+    db.auth.onAuthStateChange((olay) => { if (olay === 'SIGNED_OUT') girisGoster(); });
+  }
+  function girisGoster() {
+    $('#yukleniyor').classList.add('gizli'); $('#panel').classList.add('gizli'); $('#giris').classList.remove('gizli');
+    $('#giris-form [name=eposta]').focus();
+  }
+  $('#giris-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target, btn = $('button', f);
+    $('#giris-hata').innerHTML = '';
+    btn.disabled = true; btn.textContent = 'Giriş yapılıyor…';
+    const { data, error } = await db.auth.signInWithPassword({ email: f.eposta.value.trim(), password: f.sifre.value });
+    btn.disabled = false; btn.textContent = 'Giriş Yap';
+    if (error) { $('#giris-hata').innerHTML = `<div class="form-mesaj hata">${esc(hataMetni(error))}</div>`; return; }
+    f.sifre.value = '';
+    await girisYapildi(data.user);
+  });
+  async function girisYapildi(kullanici) {
+    const { data, error } = await db.from('yoneticiler').select('user_id').eq('user_id', kullanici.id).maybeSingle();
+    if (error || !data) {
+      await db.auth.signOut();
+      girisGoster();
+      $('#giris-hata').innerHTML = `<div class="form-mesaj hata">Bu hesap yönetici olarak tanımlı değil. Supabase'de SQL kurulum dosyasını (supabase-kurulum.sql) tekrar çalıştırın.</div>`;
+      return;
+    }
+    $('#kullanici-eposta').textContent = kullanici.email || '';
+    $('#giris').classList.add('gizli'); $('#yukleniyor').classList.add('gizli'); $('#panel').classList.remove('gizli');
+    ayarKayitli = await BE.ayarlar(); ayarlar = kopya(ayarKayitli);
+    $('#ilce-listesi').innerHTML = (ayarlar.ilceler || []).map((i) => `<option>${esc(i)}</option>`).join('');
+    await Promise.all([ilanlariYukle(), mesajlariYukle()]);
+    yonlendir();
+  }
+  $('#cikis').addEventListener('click', async () => {
+    if (kirli && !(await onayla('Çıkış yapılsın mı?', 'Kaydedilmemiş değişiklikleriniz kaybolacak.'))) return;
+    kirli = false; await db.auth.signOut(); history.replaceState(null, '', 'admin.html'); girisGoster();
+  });
+
+  /* ---------- Sayfa geçişleri ---------- */
+  function goster(sayfa) {
+    $$('[data-sayfa]').forEach((s) => s.classList.toggle('gizli', s.dataset.sayfa !== sayfa));
+    const menuAd = sayfa === 'form' ? (duzenlenen ? 'ilanlar' : 'yeni') : sayfa;
+    $$('.yan-menu button').forEach((b) => b.classList.toggle('aktif', b.dataset.git === menuAd));
+    window.scrollTo(0, 0);
+  }
+  async function git(hedef) {
+    if (kirli && !(await onayla('Sayfadan çıkılsın mı?', 'Kaydedilmemiş değişiklikleriniz kaybolacak.', 'Çık'))) return;
+    kirli = false;
+    if (location.hash === '#' + hedef) yonlendir(); else location.hash = hedef;
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-git]'); if (b) { e.preventDefault(); git(b.dataset.git); } });
+  window.addEventListener('hashchange', yonlendir);
+  function yonlendir() {
+    if ($('#panel').classList.contains('gizli')) return;
+    const h = location.hash.slice(1) || 'ozet';
+    if (h === 'yeni') { formAc(null); goster('form'); }
+    else if (h.startsWith('duzenle-')) {
+      const i = ilanlar.find((x) => String(x.id) === h.slice(8));
+      if (!i) { location.hash = 'ilanlar'; return; }
+      formAc(i); goster('form');
+    }
+    else if (h === 'ilanlar') { ilanTablosu(); goster('ilanlar'); }
+    else if (h === 'mesajlar') { mesajListesi(); goster('mesajlar'); }
+    else if (h === 'ayarlar') { ayarFormu(); goster('ayarlar'); }
+    else { ozet(); goster('ozet'); }
+  }
+  window.addEventListener('beforeunload', (e) => { if (kirli) { e.preventDefault(); e.returnValue = ''; } });
+
+  /* ---------- Veriler ---------- */
+  async function ilanlariYukle() {
+    const { data, error } = await db.from('ilanlar').select('*').order('created_at', { ascending: false });
+    if (error) { BE.bildirim(hataMetni(error), 'hata'); return; }
+    ilanlar = data || [];
+  }
+  async function mesajlariYukle() {
+    const { data, error } = await db.from('mesajlar').select('*').order('created_at', { ascending: false }).limit(500);
+    if (error) { console.error(error); return; }
+    mesajlar = data || [];
+    const n = mesajlar.filter((m) => !m.okundu).length;
+    $('#okunmamis').textContent = n || '';
+  }
+
+  /* ---------- Özet ---------- */
+  function ozet() {
+    const yayinda = ilanlar.filter((i) => i.yayinda);
+    const kutu = (s, y, hedef, vurgu) => `<button type="button" class="ozet-kutu ${vurgu ? 'vurgu' : ''}" data-git="${hedef}"><strong>${s}</strong>${y}</button>`;
+    $('#ozet-kutular').innerHTML =
+      kutu(yayinda.length, 'Yayındaki İlan', 'ilanlar') +
+      kutu(yayinda.filter((i) => i.tip === 'Satılık').length, 'Satılık', 'ilanlar') +
+      kutu(yayinda.filter((i) => i.tip === 'Kiralık').length, 'Kiralık', 'ilanlar') +
+      kutu(ilanlar.length - yayinda.length, 'Yayında Olmayan', 'ilanlar') +
+      kutu(mesajlar.filter((m) => !m.okundu).length, 'Okunmamış Mesaj', 'mesajlar', mesajlar.some((m) => !m.okundu));
+    const pop = [...ilanlar].sort((a, b) => (b.goruntulenme || 0) - (a.goruntulenme || 0)).slice(0, 6);
+    $('#ozet-populer').innerHTML = pop.length ? pop.map((i) => `<div class="mini-satir"><a href="#duzenle-${i.id}">#${i.id} ${esc(i.baslik)}</a><span style="white-space:nowrap">${ikon('goz')} ${BE.sayi(i.goruntulenme || 0)}</span></div>`).join('') : '<p>Henüz ilan yok.</p>';
+    $('#ozet-mesajlar').innerHTML = mesajlar.length ? mesajlar.slice(0, 5).map((m) => `<div class="mini-satir"><span>${m.okundu ? '' : '<b style="color:var(--kirmizi)">● </b>'}<strong>${esc(m.ad_soyad)}</strong> — ${esc(m.konu || m.tur)}</span><small style="white-space:nowrap">${BE.tarih(m.created_at)}</small></div>`).join('') + '<p style="margin:12px 0 0"><a href="#mesajlar" style="color:var(--kirmizi);font-weight:700">Tüm mesajlar →</a></p>' : '<p>Henüz mesaj yok.</p>';
+  }
+
+  /* ---------- İlan tablosu ---------- */
+  $('#il-ara').addEventListener('input', ilanTablosu);
+  $('#il-durum').addEventListener('change', ilanTablosu);
+  function ilanTablosu() {
+    const q = $('#il-ara').value.trim().toLocaleLowerCase('tr-TR'), d = $('#il-durum').value;
+    const l = ilanlar.filter((i) => {
+      if (d === 'yayinda' && !i.yayinda) return false;
+      if (d === 'kapali' && i.yayinda) return false;
+      if ((d === 'Satılık' || d === 'Kiralık') && i.tip !== d) return false;
+      if (d === 'one' && !i.one_cikan) return false;
+      if (q && !`${i.id} ${i.baslik} ${i.ilce} ${i.mahalle} ${i.kategori}`.toLocaleLowerCase('tr-TR').includes(q)) return false;
+      return true;
+    });
+    $('#il-tablo').innerHTML = `<thead><tr><th></th><th>İlan</th><th>Fiyat</th><th>Durum</th><th style="text-align:right">İşlemler</th></tr></thead><tbody>` +
+      (l.length ? l.map((i) => `<tr class="${i.yayinda ? '' : 'kapali'}">
+        <td>${BE.kapak(i) ? `<img class="kucuk-resim" src="${esc(BE.kapak(i))}" alt="" loading="lazy">` : '<div class="kucuk-resim"></div>'}</td>
+        <td><strong>#${i.id} ${esc(i.baslik)}</strong><br><small>${esc(i.tip)} · ${esc(i.kategori)} · ${esc(BE.konum(i))} · ${ikon('goz')} ${i.goruntulenme || 0}</small></td>
+        <td style="white-space:nowrap"><strong>${BE.fiyat(i)}</strong></td>
+        <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+          <button type="button" class="durum-btn ${i.yayinda ? 'acik' : ''}" data-degistir="yayinda" data-id="${i.id}">${i.yayinda ? '● Yayında' : '○ Yayında değil'}</button>
+          <button type="button" class="durum-btn ${i.one_cikan ? 'one' : ''}" data-degistir="one_cikan" data-id="${i.id}">${i.one_cikan ? '★ Öne çıkan' : '☆ Öne çıkar'}</button></div></td>
+        <td class="islemler-td"><div class="islemler">
+          <a class="btn btn-siyah btn-kucuk" href="#duzenle-${i.id}">Düzenle</a>
+          <a class="btn btn-cizgi btn-kucuk" href="ilan.html?id=${i.id}" target="_blank" ${i.yayinda ? '' : 'style="display:none"'}>Gör</a>
+          <button type="button" class="btn btn-cizgi btn-kucuk" data-sil="${i.id}" style="color:var(--kirmizi);border-color:var(--kirmizi)">Sil</button></div></td>
+      </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;padding:40px">${ilanlar.length ? 'Aramanıza uygun ilan yok.' : 'Henüz ilan eklemediniz. <a href="#yeni" style="color:var(--kirmizi);font-weight:700">İlk ilanınızı ekleyin →</a>'}</td></tr>`) + '</tbody>';
+  }
+  $('#il-tablo').addEventListener('click', async (e) => {
+    const d = e.target.closest('[data-degistir]');
+    if (d) {
+      const i = ilanlar.find((x) => String(x.id) === d.dataset.id), alan = d.dataset.degistir;
+      d.disabled = true;
+      const { error } = await db.from('ilanlar').update({ [alan]: !i[alan] }).eq('id', i.id);
+      if (error) { BE.bildirim(hataMetni(error), 'hata'); d.disabled = false; return; }
+      i[alan] = !i[alan]; ilanTablosu();
+      BE.bildirim(alan === 'yayinda' ? (i.yayinda ? 'İlan yayına alındı' : 'İlan yayından kaldırıldı') : (i.one_cikan ? 'Öne çıkarıldı' : 'Öne çıkarma kaldırıldı'));
+      return;
+    }
+    const s = e.target.closest('[data-sil]');
+    if (s) {
+      const i = ilanlar.find((x) => String(x.id) === s.dataset.sil);
+      if (!(await onayla('İlan silinsin mi?', `"${i.baslik}" ilanı ve fotoğrafları kalıcı olarak silinecek. Sadece gizlemek isterseniz "Yayında" düğmesine tıklayın.`, 'Evet, Sil'))) return;
+      const { error } = await db.from('ilanlar').delete().eq('id', i.id);
+      if (error) { BE.bildirim(hataMetni(error), 'hata'); return; }
+      fotoSil(i.resimler || []);
+      ilanlar = ilanlar.filter((x) => x.id !== i.id); ilanTablosu(); BE.bildirim('İlan silindi');
+    }
+  });
+
+  /* ---------- Fotoğraflar ---------- */
+  const depoYolu = (url) => { const k = `/object/public/${BUCKET}/`; const n = url.indexOf(k); return n >= 0 ? decodeURIComponent(url.slice(n + k.length)) : null; };
+  function fotoSil(urller) {
+    const yollar = urller.map(depoYolu).filter(Boolean);
+    if (yollar.length) db.storage.from(BUCKET).remove(yollar).then(({ error }) => error && console.warn('Fotoğraf silinemedi', error));
+  }
+  async function kucult(dosya) {
+    const EN = 1600;
+    let kaynak;
+    try { kaynak = await createImageBitmap(dosya, { imageOrientation: 'from-image' }); }
+    catch {
+      kaynak = await new Promise((coz, red) => { const im = new Image(); im.onload = () => coz(im); im.onerror = red; im.src = URL.createObjectURL(dosya); });
+    }
+    const w = kaynak.width, h = kaynak.height, o = Math.min(1, EN / Math.max(w, h));
+    const c = document.createElement('canvas'); c.width = Math.round(w * o); c.height = Math.round(h * o);
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(kaynak, 0, 0, c.width, c.height);
+    let blob = await new Promise((coz) => c.toBlob(coz, 'image/webp', 0.82));
+    if (!blob || blob.type !== 'image/webp') blob = await new Promise((coz) => c.toBlob(coz, 'image/jpeg', 0.85));
+    return blob;
+  }
+  async function fotoYukle(dosyalar) {
+    dosyalar = Array.from(dosyalar).filter((d) => d.type.startsWith('image/'));
+    if (!dosyalar.length) return;
+    $('#foto-ilerleme').classList.remove('gizli');
+    let biten = 0, hatali = 0;
+    for (const d of dosyalar) {
+      $('#foto-durum').textContent = `${biten + 1} / ${dosyalar.length} fotoğraf yükleniyor…`;
+      try {
+        const blob = await kucult(d);
+        const uzanti = blob.type === 'image/webp' ? 'webp' : 'jpg';
+        const yol = `ilan-${duzenlenen ? duzenlenen.id : 'yeni'}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${uzanti}`;
+        const { error } = await db.storage.from(BUCKET).upload(yol, blob, { contentType: blob.type, cacheControl: '31536000', upsert: false });
+        if (error) throw error;
+        fotolar.push(db.storage.from(BUCKET).getPublicUrl(yol).data.publicUrl);
+        kirli = true; fotoCiz();
+      } catch (err) { console.error(err); hatali++; BE.bildirim(`${d.name}: ${hataMetni(err)}`, 'hata'); }
+      biten++; $('#foto-bar').style.width = (biten / dosyalar.length * 100) + '%';
+    }
+    $('#foto-durum').textContent = hatali ? `${biten - hatali} fotoğraf yüklendi, ${hatali} tanesi yüklenemedi.` : `${biten} fotoğraf yüklendi. Kaydetmeyi unutmayın.`;
+    setTimeout(() => { $('#foto-ilerleme').classList.add('gizli'); $('#foto-bar').style.width = '0'; }, 3000);
+  }
+  function fotoCiz() {
+    $('#foto-liste').innerHTML = fotolar.map((u, n) => `
+      <div class="foto ${n === 0 ? 'kapak' : ''}" draggable="true" data-n="${n}">
+        ${n === 0 ? '<span class="kapak-etiket">KAPAK</span>' : ''}
+        <img src="${esc(u)}" alt="Fotoğraf ${n + 1}">
+        <div class="foto-araclar">
+          <button type="button" data-tasi="-1" ${n === 0 ? 'disabled' : ''} aria-label="Sola taşı">←</button>
+          ${n !== 0 ? '<button type="button" data-kapak aria-label="Kapak yap" title="Kapak yap">★</button>' : ''}
+          <button type="button" class="sil" data-foto-sil aria-label="Fotoğrafı kaldır">✕</button>
+          <button type="button" data-tasi="1" ${n === fotolar.length - 1 ? 'disabled' : ''} aria-label="Sağa taşı">→</button>
+        </div>
+      </div>`).join('');
+  }
+  $('#foto-sec').addEventListener('change', (e) => { fotoYukle(e.target.files); e.target.value = ''; });
+  const birak = $('#foto-birak');
+  ['dragenter', 'dragover'].forEach((t) => birak.addEventListener(t, (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); birak.classList.add('uzerinde'); } }));
+  ['dragleave', 'drop'].forEach((t) => birak.addEventListener(t, () => birak.classList.remove('uzerinde')));
+  birak.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) { e.preventDefault(); fotoYukle(e.dataTransfer.files); } });
+  const liste = $('#foto-liste');
+  liste.addEventListener('click', (e) => {
+    const f = e.target.closest('.foto'); if (!f) return;
+    const n = Number(f.dataset.n);
+    if (e.target.closest('[data-foto-sil]')) { silinecekFotolar.push(fotolar[n]); fotolar.splice(n, 1); }
+    else if (e.target.closest('[data-kapak]')) { fotolar.unshift(fotolar.splice(n, 1)[0]); }
+    else if (e.target.closest('[data-tasi]')) { const k = n + Number(e.target.closest('[data-tasi]').dataset.tasi); [fotolar[n], fotolar[k]] = [fotolar[k], fotolar[n]]; }
+    else return;
+    kirli = true; fotoCiz();
+  });
+  let surNo = null;
+  liste.addEventListener('dragstart', (e) => { const f = e.target.closest('.foto'); if (!f) return; surNo = Number(f.dataset.n); f.classList.add('surukleniyor'); e.dataTransfer.effectAllowed = 'move'; });
+  liste.addEventListener('dragover', (e) => { if (surNo !== null) e.preventDefault(); });
+  liste.addEventListener('drop', (e) => {
+    const f = e.target.closest('.foto'); if (surNo === null || !f) return;
+    e.preventDefault(); const k = Number(f.dataset.n);
+    if (k !== surNo) { fotolar.splice(k, 0, fotolar.splice(surNo, 1)[0]); kirli = true; }
+    surNo = null; fotoCiz();
+  });
+  liste.addEventListener('dragend', () => { surNo = null; fotoCiz(); });
+
+  /* ---------- Özellik etiketleri ---------- */
+  const ONERILER = ['Güney Cephe', 'Ankastre Mutfak', 'Çelik Kapı', 'Görüntülü Diyafon', 'Klima', 'Şömine', 'Bahçe', 'Havuz', 'Kapalı Otopark',
+    '7/24 Güvenlik', 'Jeneratör', 'Isı Yalıtımı', 'Ebeveyn Banyosu', 'Giyinme Odası', 'Teras', 'Manzaralı', 'Okula Yakın', 'Toplu Taşımaya Yakın',
+    'Cadde Üzeri', 'Yola Cepheli', 'Elektrik', 'Su', 'Konut İmarlı', 'Depolu'];
+  function etiketCiz() {
+    $$('#etiketler .etiket').forEach((x) => x.remove());
+    $('#etiket-gir').insertAdjacentHTML('beforebegin', etiketler.map((t, n) => `<span class="etiket">${esc(t)}<button type="button" data-etiket-sil="${n}" aria-label="${esc(t)} kaldır">×</button></span>`).join(''));
+    $('#etiket-oneri').innerHTML = ONERILER.filter((o) => !etiketler.includes(o)).map((o) => `<button type="button" class="cip" data-oneri="${esc(o)}">+ ${esc(o)}</button>`).join('');
+  }
+  const etiketEkle = (t) => { t = t.trim().slice(0, 50); if (t && !etiketler.includes(t)) { etiketler.push(t); kirli = true; } etiketCiz(); };
+  $('#etiket-gir').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); etiketEkle(e.target.value); e.target.value = ''; }
+    else if (e.key === 'Backspace' && !e.target.value && etiketler.length) { etiketler.pop(); kirli = true; etiketCiz(); }
+  });
+  $('#etiket-gir').addEventListener('blur', (e) => { if (e.target.value.trim()) { etiketEkle(e.target.value); e.target.value = ''; } });
+  $('#etiketler').addEventListener('click', (e) => { const b = e.target.closest('[data-etiket-sil]'); if (b) { etiketler.splice(Number(b.dataset.etiketSil), 1); kirli = true; etiketCiz(); } else $('#etiket-gir').focus(); });
+  $('#etiket-oneri').addEventListener('click', (e) => { const b = e.target.closest('[data-oneri]'); if (b) etiketEkle(b.dataset.oneri); });
+
+  /* ---------- Harita ---------- */
+  const MERKEZ = [37.0742, 36.2472];
+  function haritaHazirla() {
+    if (!window.L) { $('#harita').innerHTML = '<p style="padding:20px">Harita yüklenemedi. Enlem ve boylamı elle yazabilirsiniz.</p>'; return; }
+    if (!harita) {
+      harita = L.map('harita').setView(MERKEZ, 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(harita);
+      harita.on('click', (e) => konumAyarla(e.latlng.lat, e.latlng.lng));
+    }
+    setTimeout(() => harita.invalidateSize(), 50);
+    const f = $('#ilan-form'), la = parseFloat(f.enlem.value), lo = parseFloat(f.boylam.value);
+    if (isaret) { harita.removeLayer(isaret); isaret = null; }
+    if (!isNaN(la) && !isNaN(lo)) { konumAyarla(la, lo, false); harita.setView([la, lo], 16); }
+    else harita.setView(MERKEZ, 13);
+  }
+  function konumAyarla(la, lo, degisti = true) {
+    const f = $('#ilan-form');
+    f.enlem.value = la.toFixed(6); f.boylam.value = lo.toFixed(6);
+    if (degisti) kirli = true;
+    if (!window.L || !harita) return;
+    if (isaret) isaret.setLatLng([la, lo]);
+    else {
+      isaret = L.marker([la, lo], { draggable: true }).addTo(harita);
+      isaret.on('dragend', () => { const p = isaret.getLatLng(); konumAyarla(p.lat, p.lng); });
+    }
+  }
+  $('#konum-sil').addEventListener('click', () => { const f = $('#ilan-form'); f.enlem.value = f.boylam.value = ''; if (isaret) { harita.removeLayer(isaret); isaret = null; } kirli = true; });
+  ['enlem', 'boylam'].forEach((n) => $(`#ilan-form [name=${n}]`).addEventListener('change', () => {
+    const f = $('#ilan-form'), la = parseFloat(f.enlem.value.replace(',', '.')), lo = parseFloat(f.boylam.value.replace(',', '.'));
+    if (!isNaN(la) && !isNaN(lo)) { konumAyarla(la, lo); harita && harita.setView([la, lo], 16); }
+  }));
+  $('#konum-bul').addEventListener('click', async () => {
+    const f = $('#ilan-form'), b = $('#konum-bul');
+    const denemeler = [[f.mahalle.value && f.mahalle.value + ' Mahallesi', f.ilce.value, f.il.value], [f.mahalle.value, f.ilce.value, f.il.value], [f.ilce.value, f.il.value]]
+      .map((p) => p.filter(Boolean).join(', ')).filter(Boolean);
+    if (!denemeler.length) { BE.bildirim('Önce ilçe veya mahalle yazın', 'hata'); return; }
+    b.disabled = true; b.textContent = 'Aranıyor…';
+    try {
+      for (const q of denemeler) {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tr&accept-language=tr&q=${encodeURIComponent(q)}`);
+        const j = await r.json();
+        if (j && j[0]) { const la = Number(j[0].lat), lo = Number(j[0].lon); konumAyarla(la, lo); harita && harita.setView([la, lo], 16); BE.bildirim('Bulundu. İşareti tam yerine sürükleyebilirsiniz.'); return; }
+      }
+      BE.bildirim('Bulunamadı. Haritada yere tıklayarak işaretleyin.', 'hata');
+    } catch { BE.bildirim('Arama yapılamadı. Haritaya tıklayarak işaretleyin.', 'hata'); }
+    finally { b.disabled = false; b.textContent = 'Mahalleyi haritada bul'; }
+  });
+
+  /* ---------- İlan formu ---------- */
+  const form = $('#ilan-form');
+  const METIN = ['baslik', 'kategori', 'il', 'ilce', 'mahalle', 'oda_sayisi', 'bulundugu_kat', 'isitma', 'tapu_durumu', 'imar_durumu', 'aciklama'];
+  const TAMSAYI = ['brut_m2', 'net_m2', 'banyo_sayisi', 'bina_yasi', 'kat_sayisi'];
+  const PARA = ['fiyat', 'aidat'];
+  const BAYRAK = ['esyali', 'balkon', 'asansor', 'otopark', 'site_icinde', 'krediye_uygun', 'takas', 'yayinda', 'one_cikan'];
+  PARA.forEach((n) => H.bicimle(form[n]));
+  let tip = 'Satılık';
+  const tipAyarla = (t) => { tip = t; $$('.secim-grup[data-ad=tip] button').forEach((b) => b.classList.toggle('aktif', b.dataset.v === t)); };
+  $$('.secim-grup[data-ad=tip] button').forEach((b) => b.addEventListener('click', () => { tipAyarla(b.dataset.v); kirli = true; }));
+  form.addEventListener('input', () => { kirli = true; $('#form-durum').textContent = ''; });
+
+  function formAc(i) {
+    duzenlenen = i;
+    form.reset();
+    $('#form-durum').textContent = '';
+    $('#form-baslik').textContent = i ? `İlanı Düzenle #${i.id}` : 'Yeni İlan';
+    const on = $('#form-onizle'); on.classList.toggle('gizli', !(i && i.yayinda)); if (i) on.href = `ilan.html?id=${i.id}`;
+    tipAyarla(i ? i.tip : 'Satılık');
+    METIN.forEach((n) => { form[n].value = i ? (i[n] ?? '') : (n === 'il' ? 'Osmaniye' : n === 'kategori' ? 'Daire' : ''); });
+    TAMSAYI.forEach((n) => { form[n].value = i && i[n] != null ? i[n] : ''; });
+    PARA.forEach((n) => { form[n].value = i && i[n] != null ? BE.sayi(i[n]) : ''; });
+    BAYRAK.forEach((n) => { form[n].checked = i ? !!i[n] : n === 'yayinda'; });
+    form.enlem.value = i && i.enlem != null ? i.enlem : '';
+    form.boylam.value = i && i.boylam != null ? i.boylam : '';
+    fotolar = i ? [...(i.resimler || [])] : [];
+    silinecekFotolar = [];
+    etiketler = i ? [...(i.ozellikler || [])] : [];
+    fotoCiz(); etiketCiz();
+    kirli = false;
+    setTimeout(haritaHazirla, 0);
+    setTimeout(() => form.baslik.focus(), 60);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const v = {};
+    METIN.forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
+    TAMSAYI.forEach((n) => { const x = parseInt(form[n].value, 10); v[n] = isNaN(x) ? null : x; });
+    PARA.forEach((n) => { const x = H.oku(form[n].value); v[n] = form[n].value.trim() ? x : null; });
+    BAYRAK.forEach((n) => { v[n] = form[n].checked; });
+    const la = parseFloat(String(form.enlem.value).replace(',', '.')), lo = parseFloat(String(form.boylam.value).replace(',', '.'));
+    v.enlem = isNaN(la) ? null : la; v.boylam = isNaN(lo) ? null : lo;
+    v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire';
+    v.resimler = fotolar; v.ozellikler = etiketler;
+
+    const hatalar = [];
+    if (!v.baslik || v.baslik.length < 3) hatalar.push('başlık');
+    if (v.fiyat === null) hatalar.push('fiyat');
+    if (hatalar.length) {
+      $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Lütfen doldurun: ${hatalar.join(', ')}</span>`;
+      (v.baslik ? form.fiyat : form.baslik).focus(); return;
+    }
+    const btn = $('#kaydet-btn'); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    try {
+      let kayit;
+      if (duzenlenen) {
+        const { data, error } = await db.from('ilanlar').update(v).eq('id', duzenlenen.id).select().single();
+        if (error) throw error; kayit = data;
+        ilanlar = ilanlar.map((x) => x.id === kayit.id ? kayit : x);
+      } else {
+        const { data, error } = await db.from('ilanlar').insert(v).select().single();
+        if (error) throw error; kayit = data;
+        ilanlar.unshift(kayit);
+      }
+      fotoSil(silinecekFotolar); silinecekFotolar = [];
+      kirli = false;
+      BE.bildirim(duzenlenen ? 'İlan güncellendi' : 'İlan eklendi');
+      location.hash = 'ilanlar';
+    } catch (err) {
+      console.error(err);
+      $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Kaydedilemedi: ${esc(hataMetni(err))}</span>`;
+    }
+    btn.disabled = false; btn.textContent = 'İlanı Kaydet';
+  });
+
+  /* ---------- Mesajlar ---------- */
+  $('#ms-filtre').addEventListener('change', mesajListesi);
+  function mesajListesi() {
+    const f = $('#ms-filtre').value;
+    const l = mesajlar.filter((m) => !f || (f === 'okunmamis' ? !m.okundu : m.tur === f));
+    $('#ms-liste').innerHTML = l.length ? l.map((m) => `
+      <div class="mesaj-kart ${m.okundu ? '' : 'yeni'}">
+        <div class="ust">
+          <div><strong style="font-family:var(--font-baslik);font-size:1.05rem">${esc(m.ad_soyad)}</strong>
+            <span class="rozet ${m.tur === 'Mülk Teklifi' ? 'rozet-satilik' : 'rozet-gri'}" style="margin-left:6px">${esc(m.tur)}</span>
+            ${m.okundu ? '' : '<span class="rozet rozet-kiralik" style="margin-left:4px">Yeni</span>'}</div>
+          <small>${new Date(m.created_at).toLocaleString('tr-TR')}</small>
+        </div>
+        ${m.konu ? `<div><strong>Konu:</strong> ${esc(m.konu)}</div>` : ''}
+        <div>${m.telefon ? `${ikon('telefon')} ${esc(m.telefon)}` : ''} ${m.eposta ? ` · ${ikon('eposta')} ${esc(m.eposta)}` : ''}</div>
+        ${m.mesaj ? `<div class="govde">${esc(m.mesaj)}</div>` : ''}
+        <div class="butonlar">
+          ${m.telefon ? `<a class="btn btn-kirmizi btn-kucuk" href="${BE.telLink(m.telefon)}">${ikon('telefon')} Ara</a>
+          <a class="btn btn-wp btn-kucuk" target="_blank" rel="noopener" href="${BE.wpLink(m.telefon, `Merhaba ${m.ad_soyad}, ${ayarlar.firma_adi}'tan yazıyoruz.`)}">WhatsApp</a>` : ''}
+          ${m.eposta ? `<a class="btn btn-cizgi btn-kucuk" href="mailto:${esc(m.eposta)}">E-posta</a>` : ''}
+          ${m.ilan_id ? `<a class="btn btn-cizgi btn-kucuk" href="#duzenle-${m.ilan_id}">İlan #${m.ilan_id}</a>` : ''}
+          <button type="button" class="btn btn-cizgi btn-kucuk" data-okundu="${m.id}">${m.okundu ? 'Okunmadı yap' : 'Okundu işaretle'}</button>
+          <button type="button" class="btn btn-cizgi btn-kucuk" data-ms-sil="${m.id}" style="color:var(--kirmizi);border-color:var(--kirmizi)">Sil</button>
+        </div>
+      </div>`).join('') : '<div class="bos-durum">Mesaj yok.</div>';
+  }
+  $('#ms-liste').addEventListener('click', async (e) => {
+    const o = e.target.closest('[data-okundu]');
+    if (o) {
+      const m = mesajlar.find((x) => String(x.id) === o.dataset.okundu);
+      const { error } = await db.from('mesajlar').update({ okundu: !m.okundu }).eq('id', m.id);
+      if (error) { BE.bildirim(hataMetni(error), 'hata'); return; }
+      m.okundu = !m.okundu; $('#okunmamis').textContent = mesajlar.filter((x) => !x.okundu).length || ''; mesajListesi(); return;
+    }
+    const s = e.target.closest('[data-ms-sil]');
+    if (s) {
+      if (!(await onayla('Mesaj silinsin mi?', 'Bu mesaj kalıcı olarak silinecek.', 'Evet, Sil'))) return;
+      const { error } = await db.from('mesajlar').delete().eq('id', Number(s.dataset.msSil));
+      if (error) { BE.bildirim(hataMetni(error), 'hata'); return; }
+      mesajlar = mesajlar.filter((x) => String(x.id) !== s.dataset.msSil);
+      $('#okunmamis').textContent = mesajlar.filter((x) => !x.okundu).length || ''; mesajListesi(); BE.bildirim('Mesaj silindi');
+    }
+  });
+
+  /* ---------- Site ayarları ---------- */
+  const af = $('#ayar-form');
+  function saatCiz() {
+    $('#saat-duzen').innerHTML = ayarlar.calisma_saatleri.map((g, n) => `
+      <div class="saat-satir" data-n="${n}">
+        <strong>${esc(g.gun)}</strong>
+        <label class="anahtar"><input type="checkbox" data-saat="acik" ${g.acik ? 'checked' : ''}><span></span> ${g.acik ? 'Açık' : 'Kapalı'}</label>
+        <input type="time" data-saat="baslangic" value="${esc(g.baslangic)}" ${g.acik ? '' : 'disabled'} aria-label="${esc(g.gun)} açılış">
+        <input type="time" data-saat="bitis" value="${esc(g.bitis)}" ${g.acik ? '' : 'disabled'} aria-label="${esc(g.gun)} kapanış">
+      </div>`).join('');
+  }
+  $('#saat-duzen').addEventListener('change', (e) => {
+    const s = e.target.closest('.saat-satir'); if (!s) return;
+    const g = ayarlar.calisma_saatleri[Number(s.dataset.n)], k = e.target.dataset.saat;
+    g[k] = k === 'acik' ? e.target.checked : e.target.value;
+    if (k === 'acik' && g.acik && !g.baslangic) { g.baslangic = '08:30'; g.bitis = '18:30'; }
+    kirli = true; saatCiz();
+  });
+  $('#saat-kopyala').addEventListener('click', () => {
+    const p = ayarlar.calisma_saatleri[0];
+    ayarlar.calisma_saatleri.forEach((g) => { if (g.acik) { g.baslangic = p.baslangic; g.bitis = p.bitis; } });
+    kirli = true; saatCiz(); BE.bildirim('Uygulandı. Kaydetmeyi unutmayın.');
+  });
+  function listeCiz(ad) {
+    $('#liste-' + ad).innerHTML = (ayarlar[ad] || []).map((x, n) => `
+      <div class="liste-satir" data-liste="${ad}" data-n="${n}">
+        <input type="text" data-l="baslik" value="${esc(x.baslik)}" placeholder="Başlık" aria-label="Başlık">
+        <input type="text" data-l="aciklama" value="${esc(x.aciklama)}" placeholder="Kısa açıklama" aria-label="Açıklama">
+        <button type="button" class="btn btn-cizgi btn-kucuk" data-l-sil aria-label="Kaldır" style="color:var(--kirmizi);border-color:var(--kirmizi)">✕</button>
+      </div>`).join('');
+  }
+  af.addEventListener('input', (e) => {
+    kirli = true;
+    const s = e.target.closest('.liste-satir');
+    if (s && e.target.dataset.l) ayarlar[s.dataset.liste][Number(s.dataset.n)][e.target.dataset.l] = e.target.value;
+  });
+  af.addEventListener('click', (e) => {
+    const sil = e.target.closest('[data-l-sil]');
+    if (sil) { const s = sil.closest('.liste-satir'); ayarlar[s.dataset.liste].splice(Number(s.dataset.n), 1); kirli = true; listeCiz(s.dataset.liste); }
+    const ekle = e.target.closest('[data-liste-ekle]');
+    if (ekle) { const ad = ekle.dataset.listeEkle; (ayarlar[ad] = ayarlar[ad] || []).push({ baslik: '', aciklama: '' }); kirli = true; listeCiz(ad); $(`#liste-${ad} .liste-satir:last-child input`).focus(); }
+  });
+  function ayarFormu() {
+    ayarlar = kopya(ayarKayitli);
+    $$('[data-a]', af).forEach((x) => { x.value = ayarlar[x.dataset.a] ?? ''; });
+    $$('[data-s]', af).forEach((x) => { x.value = (ayarlar.sosyal || {})[x.dataset.s] || ''; });
+    $('#ayar-ilceler').value = (ayarlar.ilceler || []).join(', ');
+    saatCiz(); listeCiz('neden_biz'); listeCiz('hizmetler');
+    $('#ayar-durum').textContent = '';
+    kirli = false;
+  }
+  af.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $$('[data-a]', af).forEach((x) => { ayarlar[x.dataset.a] = x.hasAttribute('data-sayi') || x.type === 'number' ? (x.value === '' ? '' : Number(x.value)) : x.value.trim(); });
+    ayarlar.sosyal = {}; $$('[data-s]', af).forEach((x) => { ayarlar.sosyal[x.dataset.s] = x.value.trim(); });
+    ayarlar.ilceler = $('#ayar-ilceler').value.split(',').map((x) => x.trim()).filter(Boolean);
+    ayarlar.neden_biz = (ayarlar.neden_biz || []).filter((x) => x.baslik.trim());
+    ayarlar.hizmetler = (ayarlar.hizmetler || []).filter((x) => x.baslik.trim());
+    const btn = $('button[type=submit]', af); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    const { data, error } = await db.from('site_ayarlari').update({ veri: ayarlar, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
+    btn.disabled = false; btn.textContent = 'Ayarları Kaydet';
+    if (error || !data || !data.length) { $('#ayar-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Kaydedilemedi: ${esc(error ? hataMetni(error) : 'Ayar satırı bulunamadı, SQL kurulum dosyasını çalıştırın.')}</span>`; return; }
+    kirli = false; ayarKayitli = kopya(ayarlar);
+    $('#ilce-listesi').innerHTML = ayarlar.ilceler.map((i) => `<option>${esc(i)}</option>`).join('');
+    $('#ayar-durum').textContent = 'Kaydedildi ✓ Sitede hemen görünür (sayfayı yenileyin).';
+    BE.bildirim('Ayarlar kaydedildi'); listeCiz('neden_biz'); listeCiz('hizmetler');
+  });
+
+  basla();
+})();

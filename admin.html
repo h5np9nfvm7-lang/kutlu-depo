@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yönetim Paneli | Bizim Emlak</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#111111">
+<link rel="icon" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+
+<!-- GİRİŞ EKRANI -->
+<div id="giris" class="giris gizli">
+  <form class="giris-kutu" id="giris-form" novalidate>
+    <img src="images/logo.png" alt="Bizim Emlak" style="max-width:220px;margin:0 auto 10px">
+    <h1 style="font-size:1.3rem;text-align:center">Yönetim Paneli</h1>
+    <label class="alan"><span>E-posta</span><input type="email" name="eposta" autocomplete="username" required></label>
+    <label class="alan"><span>Şifre</span><input type="password" name="sifre" autocomplete="current-password" required></label>
+    <button class="btn btn-kirmizi btn-blok" type="submit">Giriş Yap</button>
+    <div id="giris-hata" aria-live="polite"></div>
+    <a href="index.html" style="text-align:center;font-size:.9rem;color:var(--metin-soluk)">← Siteye dön</a>
+  </form>
+</div>
+
+<!-- YÜKLENİYOR -->
+<div id="yukleniyor" class="giris"><div class="giris-kutu" style="text-align:center">Yükleniyor…</div></div>
+
+<!-- PANEL -->
+<div id="panel" class="panel gizli">
+  <aside class="yan">
+    <a href="index.html" target="_blank" class="yan-logo"><img src="images/logo-beyaz.png" alt="Bizim Emlak"></a>
+    <nav class="yan-menu" aria-label="Panel menüsü">
+      <button type="button" data-git="ozet"><svg class="ikon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Özet</span></button>
+      <button type="button" data-git="ilanlar"><svg class="ikon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>İlanlar</span></button>
+      <button type="button" data-git="yeni" class="yan-yeni"><svg class="ikon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Yeni İlan</span></button>
+      <button type="button" data-git="mesajlar"><svg class="ikon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg><span>Mesajlar</span> <b class="okunmamis" id="okunmamis"></b></button>
+      <button type="button" data-git="ayarlar"><svg class="ikon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Site Ayarları</span></button>
+    </nav>
+    <div class="yan-alt">
+      <a href="index.html" target="_blank" class="btn btn-kucuk btn-beyaz btn-blok">Siteyi Gör ↗</a>
+      <small id="kullanici-eposta"></small>
+      <button type="button" class="btn btn-kucuk btn-kirmizi btn-blok" id="cikis">Çıkış Yap</button>
+    </div>
+  </aside>
+
+  <main class="icerik" id="icerik">
+    <!-- ÖZET -->
+    <section data-sayfa="ozet">
+      <div class="sayfa-ust"><h1>Hoş geldiniz</h1><button type="button" class="btn btn-kirmizi" data-git="yeni">+ Yeni İlan Ekle</button></div>
+      <div class="ozet-izgara" id="ozet-kutular"></div>
+      <div class="iki-kolon" style="margin-top:24px">
+        <div class="kart-blok"><h2>En Çok Görüntülenen İlanlar</h2><div id="ozet-populer"></div></div>
+        <div class="kart-blok"><h2>Son Mesajlar</h2><div id="ozet-mesajlar"></div></div>
+      </div>
+    </section>
+
+    <!-- İLANLAR -->
+    <section data-sayfa="ilanlar" class="gizli">
+      <div class="sayfa-ust"><h1>İlanlar</h1><button type="button" class="btn btn-kirmizi" data-git="yeni">+ Yeni İlan Ekle</button></div>
+      <div class="arac-cubuk">
+        <input type="search" id="il-ara" placeholder="Başlık, ilan no, mahalle ara…" aria-label="İlan ara">
+        <select id="il-durum" aria-label="Durum filtresi">
+          <option value="">Tüm ilanlar</option><option value="yayinda">Yayında olanlar</option><option value="kapali">Yayında olmayanlar</option>
+          <option value="Satılık">Satılık</option><option value="Kiralık">Kiralık</option><option value="one">Öne çıkanlar</option>
+        </select>
+      </div>
+      <div class="kart-blok" style="padding:0;overflow:hidden"><div class="tablo-kap"><table class="tablo admin-tablo" id="il-tablo"></table></div></div>
+    </section>
+
+    <!-- İLAN FORMU -->
+    <section data-sayfa="form" class="gizli">
+      <div class="sayfa-ust"><h1 id="form-baslik">Yeni İlan</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-cizgi gizli" id="form-onizle" target="_blank">Sitede Gör ↗</a><button type="button" class="btn btn-cizgi" data-git="ilanlar">Vazgeç</button></div>
+      </div>
+      <form id="ilan-form" novalidate>
+        <div class="kart-blok"><h2>1. Temel Bilgiler</h2>
+          <div class="form-izgara uc">
+            <label class="alan tam"><span>İlan Başlığı *</span><input type="text" name="baslik" maxlength="200" required placeholder="Örn. Merkezde Asansörlü 3+1 Daire"></label>
+            <div class="alan"><span>İlan Tipi *</span>
+              <div class="secim-grup" data-ad="tip"><button type="button" data-v="Satılık">Satılık</button><button type="button" data-v="Kiralık">Kiralık</button></div></div>
+            <label class="alan"><span>Kategori *</span><select name="kategori"><option>Daire</option><option>Villa</option><option>Müstakil Ev</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option></select></label>
+            <label class="alan"><span>Fiyat (TL) *</span><input type="text" name="fiyat" inputmode="numeric" placeholder="Örn. 2.500.000"></label>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>2. Fotoğraflar</h2>
+          <label class="foto-birak" id="foto-birak">
+            <input type="file" id="foto-sec" accept="image/*" multiple class="sr-only">
+            <svg class="ikon" viewBox="0 0 24 24" style="width:40px;height:40px"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <strong>Fotoğraf seçmek için tıklayın veya buraya sürükleyin</strong>
+            <small>Birden fazla seçebilirsiniz. Fotoğraflar otomatik küçültülür. İlk fotoğraf kapak olur; sürükleyerek veya oklarla sıralayın.</small>
+          </label>
+          <div id="foto-ilerleme" class="gizli"><div class="ilerleme"><div id="foto-bar"></div></div><small id="foto-durum"></small></div>
+          <div class="foto-liste" id="foto-liste"></div>
+        </div>
+
+        <div class="kart-blok"><h2>3. Konum</h2>
+          <div class="form-izgara uc">
+            <label class="alan"><span>İl</span><input type="text" name="il" value="Osmaniye" maxlength="50"></label>
+            <label class="alan"><span>İlçe</span><input type="text" name="ilce" list="ilce-listesi" maxlength="50"></label>
+            <label class="alan"><span>Mahalle</span><input type="text" name="mahalle" maxlength="80"></label>
+          </div>
+          <datalist id="ilce-listesi"></datalist>
+          <p style="margin:16px 0 8px;font-size:.9rem;color:var(--metin-soluk)">Haritada ilanın yerine tıklayın (işareti sürükleyerek düzeltebilirsiniz) veya “Mahalleyi bul” düğmesini kullanın.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <button type="button" class="btn btn-siyah btn-kucuk" id="konum-bul">Mahalleyi haritada bul</button>
+            <button type="button" class="btn btn-cizgi btn-kucuk" id="konum-sil">Konumu kaldır</button>
+            <input type="text" name="enlem" placeholder="Enlem" style="width:130px;padding:8px" aria-label="Enlem">
+            <input type="text" name="boylam" placeholder="Boylam" style="width:130px;padding:8px" aria-label="Boylam">
+          </div>
+          <div id="harita" class="admin-harita"></div>
+        </div>
+
+        <div class="kart-blok"><h2>4. Detaylar</h2>
+          <div class="form-izgara dort">
+            <label class="alan"><span>Brüt m²</span><input type="number" name="brut_m2" min="0" inputmode="numeric"></label>
+            <label class="alan"><span>Net m²</span><input type="number" name="net_m2" min="0" inputmode="numeric"></label>
+            <label class="alan"><span>Oda Sayısı</span><input type="text" name="oda_sayisi" list="oda-listesi" maxlength="10" placeholder="3+1"></label>
+            <label class="alan"><span>Banyo Sayısı</span><input type="number" name="banyo_sayisi" min="0"></label>
+            <label class="alan"><span>Bina Yaşı</span><input type="number" name="bina_yasi" min="0" placeholder="0 = sıfır bina"></label>
+            <label class="alan"><span>Bulunduğu Kat</span><input type="text" name="bulundugu_kat" list="kat-listesi" maxlength="20"></label>
+            <label class="alan"><span>Kat Sayısı</span><input type="number" name="kat_sayisi" min="0"></label>
+            <label class="alan"><span>Isıtma</span><input type="text" name="isitma" list="isitma-listesi" maxlength="40"></label>
+            <label class="alan"><span>Aidat (TL)</span><input type="text" name="aidat" inputmode="numeric"></label>
+            <label class="alan"><span>Tapu Durumu</span><input type="text" name="tapu_durumu" list="tapu-listesi" maxlength="40"></label>
+            <label class="alan"><span>İmar Durumu (arsa)</span><input type="text" name="imar_durumu" maxlength="60" placeholder="Örn. Konut İmarlı"></label>
+          </div>
+          <datalist id="oda-listesi"><option>1+0</option><option>1+1</option><option>2+1</option><option>3+1</option><option>3+2</option><option>4+1</option><option>4+2</option><option>5+1</option><option>6+1</option></datalist>
+          <datalist id="kat-listesi"><option>Bodrum</option><option>Bahçe Katı</option><option>Giriş</option><option>Yüksek Giriş</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>Çatı Katı</option><option>Villa</option></datalist>
+          <datalist id="isitma-listesi"><option>Doğalgaz (Kombi)</option><option>Merkezi</option><option>Yerden Isıtma</option><option>Klima</option><option>Soba</option><option>Yok</option></datalist>
+          <datalist id="tapu-listesi"><option>Kat Mülkiyetli</option><option>Kat İrtifaklı</option><option>Müstakil Tapulu</option><option>Hisseli Tapulu</option></datalist>
+
+          <div class="anahtar-izgara">
+            <label class="anahtar"><input type="checkbox" name="esyali"><span></span> Eşyalı</label>
+            <label class="anahtar"><input type="checkbox" name="balkon"><span></span> Balkon</label>
+            <label class="anahtar"><input type="checkbox" name="asansor"><span></span> Asansör</label>
+            <label class="anahtar"><input type="checkbox" name="otopark"><span></span> Otopark</label>
+            <label class="anahtar"><input type="checkbox" name="site_icinde"><span></span> Site İçinde</label>
+            <label class="anahtar"><input type="checkbox" name="krediye_uygun"><span></span> Krediye Uygun</label>
+            <label class="anahtar"><input type="checkbox" name="takas"><span></span> Takasa Uygun</label>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>5. Açıklama ve Özellikler</h2>
+          <label class="alan"><span>Açıklama</span><textarea name="aciklama" rows="7" maxlength="5000" placeholder="İlanı anlatan birkaç cümle yazın…"></textarea></label>
+          <div class="alan" style="margin-top:16px"><span>Özellikler (yazıp Enter'a basın veya aşağıdan seçin)</span>
+            <div class="etiket-kutu" id="etiketler"><input type="text" id="etiket-gir" placeholder="Örn. Güney cephe" aria-label="Özellik ekle"></div>
+            <div class="cip-grup" id="etiket-oneri" style="margin-top:10px"></div>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>6. Yayın</h2>
+          <div class="anahtar-izgara">
+            <label class="anahtar"><input type="checkbox" name="yayinda" checked><span></span> Sitede yayında</label>
+            <label class="anahtar"><input type="checkbox" name="one_cikan"><span></span> Ana sayfada öne çıkar</label>
+          </div>
+        </div>
+
+        <div class="kaydet-cubuk">
+          <span id="form-durum" aria-live="polite"></span>
+          <button type="button" class="btn btn-cizgi" data-git="ilanlar">Vazgeç</button>
+          <button type="submit" class="btn btn-kirmizi" id="kaydet-btn">İlanı Kaydet</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- MESAJLAR -->
+    <section data-sayfa="mesajlar" class="gizli">
+      <div class="sayfa-ust"><h1>Mesajlar</h1>
+        <select id="ms-filtre" style="width:auto" aria-label="Mesaj filtresi"><option value="">Tümü</option><option value="okunmamis">Okunmamış</option><option value="İletişim">İletişim formu</option><option value="Mülk Teklifi">Mülk teklifleri</option><option value="İlan Talebi">İlan talepleri</option></select>
+      </div>
+      <div id="ms-liste"></div>
+    </section>
+
+    <!-- AYARLAR -->
+    <section data-sayfa="ayarlar" class="gizli">
+      <div class="sayfa-ust"><h1>Site Ayarları</h1></div>
+      <form id="ayar-form" novalidate>
+        <div class="kart-blok"><h2>İletişim Bilgileri</h2>
+          <div class="form-izgara">
+            <label class="alan"><span>Firma Adı</span><input type="text" data-a="firma_adi"></label>
+            <label class="alan"><span>Slogan</span><input type="text" data-a="slogan"></label>
+            <label class="alan"><span>Telefon</span><input type="tel" data-a="telefon"></label>
+            <label class="alan"><span>2. Telefon (isteğe bağlı)</span><input type="tel" data-a="telefon2"></label>
+            <label class="alan"><span>WhatsApp Numarası (boş bırakırsanız WhatsApp butonları gizlenir)</span><input type="tel" data-a="whatsapp" placeholder="Örn. 0532 123 45 67"></label>
+            <label class="alan"><span>E-posta</span><input type="email" data-a="eposta"></label>
+            <label class="alan tam"><span>Adres</span><input type="text" data-a="adres"></label>
+            <label class="alan tam"><span>Haritada aranacak adres (iletişim sayfasındaki harita için)</span><input type="text" data-a="harita_arama"></label>
+            <label class="alan"><span>Danışman Adı (ilan sayfasında görünür)</span><input type="text" data-a="danisman_adi"></label>
+            <label class="alan"><span>Hizmet Bölgesi</span><input type="text" data-a="hizmet_bolgesi"></label>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>Çalışma Saatleri</h2>
+          <div id="saat-duzen"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+            <button type="button" class="btn btn-cizgi btn-kucuk" id="saat-kopyala">Pazartesi saatini diğer açık günlere uygula</button>
+          </div>
+          <label class="alan"><span>Saatlerin altındaki not</span><input type="text" data-a="calisma_notu"></label>
+        </div>
+
+        <div class="kart-blok"><h2>Ana Sayfa</h2>
+          <div class="form-izgara">
+            <label class="alan tam"><span>Büyük Başlık</span><input type="text" data-a="hero_baslik"></label>
+            <label class="alan tam"><span>Başlık Altı Yazı</span><input type="text" data-a="hero_alt"></label>
+            <label class="alan"><span>Tecrübe Yılı</span><input type="number" data-a="tecrube_yili" min="0"></label>
+            <label class="alan"><span>Duyuru Bandı (en üstte kırmızı şerit; boş bırakırsanız görünmez)</span><input type="text" data-a="duyuru" placeholder="Örn. Bayram süresince ofisimiz kapalıdır."></label>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>Hakkımızda</h2>
+          <label class="alan"><span>Hakkımızda Metni</span><textarea data-a="hakkimizda_metni" rows="7"></textarea></label>
+          <div class="form-izgara" style="margin-top:16px">
+            <label class="alan"><span>Misyonumuz</span><textarea data-a="misyon" rows="3"></textarea></label>
+            <label class="alan"><span>Vizyonumuz</span><textarea data-a="vizyon" rows="3"></textarea></label>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>Neden Biz? (Değerlerimiz)</h2><div id="liste-neden_biz"></div>
+          <button type="button" class="btn btn-cizgi btn-kucuk" data-liste-ekle="neden_biz">+ Madde Ekle</button></div>
+
+        <div class="kart-blok"><h2>Hizmetlerimiz</h2><div id="liste-hizmetler"></div>
+          <button type="button" class="btn btn-cizgi btn-kucuk" data-liste-ekle="hizmetler">+ Hizmet Ekle</button></div>
+
+        <div class="kart-blok"><h2>Diğer</h2>
+          <div class="form-izgara">
+            <label class="alan tam"><span>İlçeler (virgülle ayırın — arama kutularında görünür)</span><input type="text" id="ayar-ilceler"></label>
+            <label class="alan"><span>Tapu Harcı Alıcı Oranı (%)</span><input type="number" step="0.01" data-a="tapu_alici_orani" data-sayi></label>
+            <label class="alan"><span>Tapu Harcı Satıcı Oranı (%)</span><input type="number" step="0.01" data-a="tapu_satici_orani" data-sayi></label>
+          </div>
+        </div>
+
+        <div class="kart-blok"><h2>Sosyal Medya (boş olanlar görünmez)</h2>
+          <div class="form-izgara">
+            <label class="alan"><span>Facebook adresi</span><input type="url" data-s="facebook" placeholder="https://facebook.com/..."></label>
+            <label class="alan"><span>Instagram adresi</span><input type="url" data-s="instagram" placeholder="https://instagram.com/..."></label>
+            <label class="alan"><span>YouTube adresi</span><input type="url" data-s="youtube"></label>
+            <label class="alan"><span>TikTok adresi</span><input type="url" data-s="tiktok"></label>
+          </div>
+        </div>
+
+        <div class="kaydet-cubuk">
+          <span id="ayar-durum" aria-live="polite"></span>
+          <button type="submit" class="btn btn-kirmizi">Ayarları Kaydet</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<!-- ONAY PENCERESİ -->
+<div class="modal gizli" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-baslik">
+  <div class="modal-kutu">
+    <h2 id="modal-baslik"></h2>
+    <p id="modal-metin"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button type="button" class="btn btn-cizgi" id="modal-hayir">Vazgeç</button>
+      <button type="button" class="btn btn-kirmizi" id="modal-evet">Evet</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/hesap.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

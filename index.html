@@ -1,40 +1,153 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Bizim Emlak - Osmaniye'nin En Güvenilir Emlak Bürosu">
-<meta property="og:description" content="Osmaniye'de en güvenilir emlak bülteni. Güncel ilanlar, konut kredisi hesaplama ve emlak bilgileri.">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bizim Emlak | Osmaniye Satılık ve Kiralık Gayrimenkul</title>
+<meta name="description" content="Bizim Emlak - Osmaniye'de 26 yıllık tecrübeyle satılık ve kiralık daire, villa, arsa, dükkan ve ofis ilanları. Ücretsiz değerleme ve danışmanlık.">
+<meta property="og:title" content="Bizim Emlak | Osmaniye Gayrimenkul">
+<meta property="og:description" content="Osmaniye'de satılık ve kiralık gayrimenkul ilanları.">
 <meta property="og:image" content="images/logo.png">
-<meta property="og:url" content="https://yourdomain.com">
 <meta property="og:type" content="website">
-  <title>Bizim Emlak - Osmaniye'nin En Güvenilir Emlak Bürosu</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#111111">
+<link rel="icon" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Üst Menü (Header) -->
-  <header class="header">
-    <a href="index.html" class="logo">
-      <span class="logo-icon">🏠</span> Bizim Emlak
-    </a>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="index.html">Ana Sayfa</a></li>
-        <li><a href="ilanlar.html">İlanlar</a></li>
-        <li><a href="hesaplamalar.html">Hesaplamalar</a></li>
-        <li><a href="rehber.html">Emlak Rehberi</a></li>
-        <li><a href="hakkimizda.html">Hakkımızda</a></li>
-        <li><a href="iletisim.html">İletişim</a></li>
-        <li><a href="favoriler.html">Favoriler</a></li>
-      </ul>
-      <div class="hamburger"><span></span><span></span><span></span></div>
-    </nav>
-  </header>
+<header id="site-ust"></header>
 
-  <!-- Son Baktığımız İlanlar -->
-  <section style="padding: 2rem 2rem; background: var(--renk-arapa);">
-    <h2 style="font-family: var(--font-baslik); text-align: center; margin-bottom: 2rem; color: var(--renk-siyah);">Son Baktığımız İlanlar</h2>
-    <div style="max-width: 1200px; margin: 0 auto;" id="sonBaktigimizIlanlar"></div>
+<main>
+  <!-- KARŞILAMA -->
+  <section class="hero">
+    <div class="kap">
+      <h1 data-ayar="hero_baslik">Hayalinizdeki Eve Bizimle Ulaşın</h1>
+      <p class="alt" data-ayar="hero_alt"></p>
+      <form class="arama-kutu" id="arama-form" role="search" aria-label="İlan ara">
+        <div class="arama-sekme" role="group" aria-label="İlan tipi">
+          <button type="button" class="aktif" data-tip="">Tümü</button>
+          <button type="button" data-tip="Satılık">Satılık</button>
+          <button type="button" data-tip="Kiralık">Kiralık</button>
+        </div>
+        <div class="arama-alanlar">
+          <label class="alan"><span>Kelime</span><input type="search" name="q" placeholder="Örn. 3+1, bahçeli, site içi"></label>
+          <label class="alan"><span>Kategori</span>
+            <select name="kategori">
+              <option value="">Tümü</option>
+              <option>Daire</option><option>Villa</option><option>Müstakil Ev</option>
+              <option>Arsa</option><option>Dükkan</option><option>Ofis</option>
+            </select>
+          </label>
+          <label class="alan"><span>İlçe</span><select name="ilce" id="arama-ilce"><option value="">Tümü</option></select></label>
+          <label class="alan"><span>Oda</span>
+            <select name="oda">
+              <option value="">Fark etmez</option><option>1+0</option><option>1+1</option><option>2+1</option>
+              <option>3+1</option><option>4+1</option><option value="5+">5+ ve üzeri</option>
+            </select>
+          </label>
+          <button class="btn btn-kirmizi" type="submit" style="align-self:end;height:48px">
+            <svg class="ikon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> İlan Ara
+          </button>
+        </div>
+      </form>
+    </div>
   </section>
+
+  <!-- KATEGORİLER -->
+  <section class="bolum">
+    <div class="kap">
+      <div class="bolum-baslik belir">
+        <h2>Ne Arıyorsunuz?</h2>
+        <p>Kategoriye tıklayarak ilgili ilanları hemen görün.</p>
+      </div>
+      <div class="kategori-izgara" id="kategoriler"></div>
+    </div>
+  </section>
+
+  <!-- ÖNE ÇIKANLAR -->
+  <section class="bolum bolum-gri">
+    <div class="kap">
+      <div class="ust-satir">
+        <div><h2>Öne Çıkan İlanlar</h2><p style="margin:0;color:var(--metin-soluk)">Sizin için seçtiğimiz fırsatlar</p></div>
+        <a href="ilanlar.html" class="btn btn-cizgi">Tüm İlanlar</a>
+      </div>
+      <div class="ilan-izgara" id="one-cikanlar"></div>
+    </div>
+  </section>
+
+  <!-- NEDEN BİZ -->
+  <section class="bolum">
+    <div class="kap">
+      <div class="bolum-baslik belir">
+        <h2>Neden Bizim Emlak?</h2>
+        <p data-ayar="slogan"></p>
+      </div>
+      <div class="kutu-izgara" id="neden-biz"></div>
+    </div>
+  </section>
+
+  <!-- RAKAMLAR -->
+  <section class="rakamlar">
+    <div class="kap rakam-izgara">
+      <div class="rakam"><strong data-say id="r-tecrube">0</strong><span>Yıllık Tecrübe</span></div>
+      <div class="rakam"><strong data-say id="r-ilan">0</strong><span>Aktif İlan</span></div>
+      <div class="rakam"><strong data-say id="r-satilik">0</strong><span>Satılık</span></div>
+      <div class="rakam"><strong data-say id="r-kiralik">0</strong><span>Kiralık</span></div>
+    </div>
+  </section>
+
+  <!-- HİZMETLER -->
+  <section class="bolum bolum-gri">
+    <div class="kap">
+      <div class="bolum-baslik belir">
+        <h2>Hizmetlerimiz</h2>
+        <p>Alımdan satışa, kiralamadan tapuya kadar her adımda yanınızdayız.</p>
+      </div>
+      <div class="kutu-izgara uc" id="hizmetler"></div>
+    </div>
+  </section>
+
+  <!-- SON EKLENENLER -->
+  <section class="bolum">
+    <div class="kap">
+      <div class="ust-satir">
+        <div><h2>Son Eklenen İlanlar</h2></div>
+        <a href="ilanlar.html?sira=yeni" class="btn btn-cizgi">Hepsini Gör</a>
+      </div>
+      <div class="ilan-izgara" id="son-eklenenler"></div>
+    </div>
+  </section>
+
+  <!-- ÇAĞRI -->
+  <section class="bolum" style="padding-top:0">
+    <div class="kap">
+      <div class="cagri belir">
+        <div>
+          <h2>Evinizi satmak veya kiraya vermek mi istiyorsunuz?</h2>
+          <p>Mülkünüzün değerini ücretsiz belirleyelim, doğru alıcıya hızla ulaştıralım.</p>
+        </div>
+        <div class="butonlar" id="cagri-butonlar">
+          <a href="iletisim.html#mulk-formu" class="btn btn-kirmizi">Ücretsiz Değerleme İste</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SON BAKILANLAR -->
+  <section class="bolum bolum-gri gizli" id="son-bakilan-bolum">
+    <div class="kap">
+      <div class="ust-satir"><h2>Son Baktığınız İlanlar</h2></div>
+      <div class="ilan-izgara" id="son-bakilanlar"></div>
+    </div>
+  </section>
+</main>
+
+<footer id="site-alt"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/anasayfa.js"></script>
 </body>
 </html>

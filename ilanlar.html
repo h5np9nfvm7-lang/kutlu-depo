@@ -1,175 +1,154 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Bizim Emlak - İlanlar">
-<meta property="og:description" content="İlanlar sayfası - Osmaniye emlak bilgileri">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İlanlar | Bizim Emlak Osmaniye</title>
+<meta name="description" content="Osmaniye satılık ve kiralık daire, villa, müstakil ev, arsa, dükkan ve ofis ilanları. Fiyat, oda sayısı, metrekare ve konuma göre filtreleyin.">
+<meta property="og:title" content="İlanlar | Bizim Emlak">
+<meta property="og:description" content="Osmaniye satılık ve kiralık gayrimenkul ilanları.">
 <meta property="og:image" content="images/logo.png">
-<meta property="og:url" content="https://yourdomain.com/ilanlar">
-<meta property="og:type" content="website">
-  <title>Bizim Emlak - İlanlar</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#111111">
+<link rel="icon" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Üst Menü (Header) -->
-  <header class="header">
-    <a href="index.html" class="logo">
-      <span class="logo-icon">🏠</span> Bizim Emlak
-    </a>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="index.html">Ana Sayfa</a></li>
-        <li><a href="ilanlar.html">İlanlar</a></li>
-        <li><a href="hesaplamalar.html">Hesaplamalar</a></li>
-        <li><a href="rehber.html">Emlak Rehberi</a></li>
-        <li><a href="hakkimizda.html">Hakkımızda</a></li>
-        <li><a href="iletisim.html">İletişim</a></li>
-        <li><a href="favoriler.html">Favoriler</a></li>
-      </ul>
-      <div class="hamburger"><span></span><span></span><span></span></div>
-    </nav>
-  </header>
+<header id="site-ust"></header>
 
-  <!-- Ana İçerik -->
-  <main style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
-    <!-- Filtre Paneli -->
-    <div id="filterPanel" style="display: block; background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; max-height: 500px; overflow-y: auto;">
-      <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem; font-size: 1.2rem;">Filtreler</h3>
-      <button id="closeFilterBtn" style="width: 100%; background: none; border: none; color: var(--renk-metin); font-size: 0.9rem; margin-bottom: 1rem; text-align: left; padding: 0.5rem;">X</button>
-      <div style="margin-bottom: 1rem;">
-        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Satılık / Kiralık</label>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-          <label><input type="radio" name="filterTip" value="satılık" id="tipSatilik"> Satılık</label>
-          <label><input type="radio" name="filterTip" value="kiralık" id="tipKiralik"> Kiralık</label>
-          <label><input type="radio" name="filterTip" value="Tümü" id="tipTümü" checked> Tümü</label>
+<main>
+  <section class="sayfa-bas">
+    <div class="kap">
+      <div class="yol"><a href="index.html">Ana Sayfa</a> / İlanlar</div>
+      <h1 id="liste-baslik">Tüm İlanlar</h1>
+      <p>Aradığınız mülkü filtreleri kullanarak kolayca bulun.</p>
+    </div>
+  </section>
+
+  <section class="bolum" style="padding-top:36px">
+    <div class="kap liste-duzen">
+      <!-- FİLTRELER -->
+      <aside class="filtre-panel" id="filtre-panel" aria-label="Filtreler">
+        <h3>Filtrele <button class="btn btn-kucuk btn-cizgi filtre-kapat-x" type="button" data-filtre-kapat aria-label="Filtreleri kapat">✕</button></h3>
+
+        <div class="filtre-grup">
+          <strong>İlan Tipi</strong>
+          <div class="cip-grup" data-tek="tip">
+            <button type="button" class="cip" data-deger="">Tümü</button>
+            <button type="button" class="cip" data-deger="Satılık">Satılık</button>
+            <button type="button" class="cip" data-deger="Kiralık">Kiralık</button>
+          </div>
         </div>
-      </div>
-      <!-- Kategori (Çoklu seçim) -->
-      <div style="margin-bottom: 1rem;">
-        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Kategori</label>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem;">
-          <label><input type="checkbox" name="filterKategori" value="Daire" id="catDaire"> Daire</label>
-          <label><input type="checkbox" name="filterKategori" value="Villa" id="catVilla"> Villa</label>
-          <label><input type="checkbox" name="filterKategori" value="Müstakil Ev" id="catMustakil"> Müstakil Ev</label>
-          <label><input type="checkbox" name="filterKategori" value="Arsa" id="catArsa"> Arsa</label>
-          <label><input type="checkbox" name="filterKategori" value="Dükkan" id="catDukkan"> Dükkan</label>
-          <label><input type="checkbox" name="filterKategori" value="Ofis" id="catOfis"> Ofis</label>
+
+        <div class="filtre-grup">
+          <strong>Kategori</strong>
+          <div class="cip-grup" data-coklu="kategori">
+            <button type="button" class="cip" data-deger="Daire">Daire</button>
+            <button type="button" class="cip" data-deger="Villa">Villa</button>
+            <button type="button" class="cip" data-deger="Müstakil Ev">Müstakil Ev</button>
+            <button type="button" class="cip" data-deger="Arsa">Arsa</button>
+            <button type="button" class="cip" data-deger="Dükkan">Dükkan</button>
+            <button type="button" class="cip" data-deger="Ofis">Ofis</button>
+          </div>
         </div>
-      </div>
-      
-      <!-- İl / İlçe -->
-      <div style="margin-bottom: 1rem;">
-        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">İl / İlçe</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-          <select name="filterIl" id="filterIl" onchange="updateIlce(this.value)">
-            <option value="Tümü">Tümü</option>
-            <option value="Osmaniye">Osmaniye</option>
-            <option value="Yenişehir">Yenişehir</option>
-            <option value="Villasaray">Villasaray</option>
-            <option value="Favori">Favori</option>
-          </select>
-          <select name="filterIlce" id="filterIlce">
-            <option value="Tümü">Tümü</option>
-          </select>
+
+        <div class="filtre-grup">
+          <label class="alan"><strong>İlçe</strong>
+            <select id="f-ilce"><option value="">Tüm ilçeler</option></select>
+          </label>
         </div>
-      </div>
-      
-      <!-- Fiyat Aralığı -->
-      <div style="margin-bottom: 1rem;">
-        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Fiyat Aralığı (₺)</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-          <input type="number" id="fiyatMin" placeholder="Min" style="padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);">
-          <input type="number" id="fiyatMax" placeholder="Max" style="padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);">
+
+        <div class="filtre-grup">
+          <strong>Fiyat (TL)</strong>
+          <div class="iki-alan">
+            <input type="number" id="f-fmin" placeholder="En az" min="0" inputmode="numeric" aria-label="En az fiyat">
+            <input type="number" id="f-fmax" placeholder="En çok" min="0" inputmode="numeric" aria-label="En çok fiyat">
+          </div>
         </div>
-      </div>
-      
-      <!-- Oda Sayısı -->
-      <div style="margin-bottom: 1rem;">
-        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Oda Sayısı</label>
-        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
-          <label><input type="checkbox" name="filterOda" value="0+0" id="oda00"> 0+0</label>
-          <label><input type="checkbox" name="filterOda" value="1+1" id="oda11"> 1+1</label>
-          <label><input type="checkbox" name="filterOda" value="2+1" id="oda21"> 2+1</label>
-          <label><input type="checkbox" name="filterOda" value="3+1" id="oda31"> 3+1</label>
-          <label><input type="checkbox" name="filterOda" value="4+1" id="oda41"> 4+1</label>
-          <label><input type="checkbox" name="filterOda" value="5+" id="oda5"> 5+</label>
+
+        <div class="filtre-grup">
+          <strong>Oda Sayısı</strong>
+          <div class="cip-grup" data-coklu="oda">
+            <button type="button" class="cip" data-deger="1+0">1+0</button>
+            <button type="button" class="cip" data-deger="1+1">1+1</button>
+            <button type="button" class="cip" data-deger="2+1">2+1</button>
+            <button type="button" class="cip" data-deger="3+1">3+1</button>
+            <button type="button" class="cip" data-deger="4+1">4+1</button>
+            <button type="button" class="cip" data-deger="5+">5+</button>
+          </div>
         </div>
-      </div>
-      
-      <!-- Eşyalı ve Sistemler -->
-      <div style="margin-bottom: 1rem;">
-        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Özellikler</label>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
-          <label><input type="checkbox" name="filterEsyali" id="esyali"> Eşyalı</label>
-          <label><input type="checkbox" name="filterKrediye" id="krediye"> Krediye Uygun</label>
-          <label><input type="checkbox" name="filterSiteici" id="siteici"> Site İçi</label>
-          <label><input type="checkbox" name="filterOtopark" id="otopark"> Otopark</label>
+
+        <div class="filtre-grup">
+          <strong>Metrekare (m²)</strong>
+          <div class="iki-alan">
+            <input type="number" id="f-mmin" placeholder="En az" min="0" inputmode="numeric" aria-label="En az metrekare">
+            <input type="number" id="f-mmax" placeholder="En çok" min="0" inputmode="numeric" aria-label="En çok metrekare">
+          </div>
         </div>
-        <div style="margin-top: 1rem; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
-          <label><input type="checkbox" name="filterAsansor" id="asansor"> Asansör</label>
-          <label><input type="checkbox" name="filterBalkon" id="balkon"> Balkon</label>
-          <label><input type="checkbox" name="filterGaraj" id="garaj"> Garaj</label>
-          <label><input type="checkbox" name="filterLift" id="lift"> Lift</label>
+
+        <div class="filtre-grup">
+          <strong>Bina Yaşı</strong>
+          <div class="cip-grup" data-tek="yas">
+            <button type="button" class="cip" data-deger="">Tümü</button>
+            <button type="button" class="cip" data-deger="0-5">0-5</button>
+            <button type="button" class="cip" data-deger="6-10">6-10</button>
+            <button type="button" class="cip" data-deger="11-20">11-20</button>
+            <button type="button" class="cip" data-deger="21-999">21+</button>
+          </div>
         </div>
-      </div>
-      
-      <!-- Butonlar -->
-      <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--renk-kenarik);">
-        <button id="applyFilters" style="width: 100%; background: var(--renk-ana); color: var(--renk-beyaz); border: none; padding: 0.8rem; font-family: var(--font-baslik); font-size: 0.9rem; cursor: pointer;">Filtrele</button>
-        <button id="clearFilters" style="width: 100%; background: var(--renk-arapa); color: var(--renk-metin); border: 1px solid var(--renk-kenarik); padding: 0.8rem; font-family: var(--font-baslik); font-size: 0.9rem; margin-top: 0.5rem; cursor: pointer;">Filtreleri Temizle</button>
+
+        <div class="filtre-grup" id="f-onaylar">
+          <strong>Özellikler</strong>
+          <label class="onay"><input type="checkbox" data-bayrak="esyali"> Eşyalı</label>
+          <label class="onay"><input type="checkbox" data-bayrak="krediye_uygun"> Krediye uygun</label>
+          <label class="onay"><input type="checkbox" data-bayrak="site_icinde"> Site içinde</label>
+          <label class="onay"><input type="checkbox" data-bayrak="otopark"> Otopark</label>
+          <label class="onay"><input type="checkbox" data-bayrak="asansor"> Asansör</label>
+          <label class="onay"><input type="checkbox" data-bayrak="balkon"> Balkon</label>
+          <label class="onay"><input type="checkbox" data-bayrak="takas"> Takasa uygun</label>
+        </div>
+
+        <div class="filtre-alt">
+          <button type="button" class="btn btn-cizgi btn-blok" id="f-temizle">Filtreleri Temizle</button>
+          <button type="button" class="btn btn-kirmizi btn-blok filtre-kapat-btn" data-filtre-kapat>Sonuçları Gör (<span id="f-sayi">0</span>)</button>
+        </div>
+      </aside>
+
+      <!-- SONUÇLAR -->
+      <div>
+        <div class="sonuc-ust">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-siyah btn-kucuk filtre-ac" type="button" id="filtre-ac">
+              <svg class="ikon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg> Filtrele
+            </button>
+            <strong id="sonuc-sayi" aria-live="polite">İlanlar yükleniyor…</strong>
+          </div>
+          <div class="sag">
+            <input type="search" id="f-q" placeholder="İlanlarda ara…" aria-label="İlanlarda ara" style="width:200px;padding:9px 12px">
+            <select id="f-sira" aria-label="Sıralama">
+              <option value="yeni">En yeni</option>
+              <option value="fiyat-artan">Fiyat (düşükten yükseğe)</option>
+              <option value="fiyat-azalan">Fiyat (yüksekten düşüğe)</option>
+              <option value="m2">Metrekare (büyükten küçüğe)</option>
+              <option value="populer">En çok görüntülenen</option>
+            </select>
+            <button type="button" class="gorunum-btn aktif" data-gorunum="izgara" aria-label="Izgara görünümü"><svg class="ikon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+            <button type="button" class="gorunum-btn" data-gorunum="liste" aria-label="Liste görünümü"><svg class="ikon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+          </div>
+        </div>
+        <div class="ilan-izgara" id="sonuclar"></div>
+        <nav class="sayfalama" id="sayfalama" aria-label="Sayfalar"></nav>
       </div>
     </div>
-    <!-- Mobil Filtre Butonu -->
-    <div id="mobileFilterBtn" style="display: block; width: 100%; background: var(--renk-ana); color: var(--renk-beyaz); padding: 0.8rem; font-family: var(--font-baslik); font-size: 1rem; cursor: pointer; margin: 2rem 0 0 0; text-align: center;">Filtrele</div>
+  </section>
+</main>
 
-    <!-- Sonuçlar -->
-    <section id="sonucBilgisi" style="margin-bottom: 2rem; text-align: center; color: var(--renk-metin); font-size: 0.9rem;">
-      <span id="ilanSayisi">0</span> ilan bulundu
-    </section>
+<footer id="site-alt"></footer>
 
-    <!-- Sıralama ve Görünüm -->
-    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap;">
-      <select id="sirala" style="flex: 1; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin); font-size: 0.8rem;">
-        <option value="yenilik">En Yeni</option>
-        <option value="fiyatArtan">Fiyat (Artan)</option>
-        <option value="fiyatAzalan">Fiyat (Azalan)</option>
-        <option value="m2Kucuk">m² (Küçükten Büyük)</option>
-      </select>
-      <select id="gorunum" style="flex: 1; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin); font-size: 0.8rem;">
-        <option value="izgara">Izgara</option>
-        <option value="liste">Liste</option>
-      </select>
-      <span style="margin-left: 1rem; font-size: 0.8rem; color: var(--renk-metin);">9 ilan / sayfa</span>
-    </div>
-
-    <!-- İlannar Listesi -->
-    <div id="ilanlarContainer" style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 400px;"></div>
-
-    <!-- Sayfalama -->
-    <div id="sayfalama" style="margin-top: 2rem; text-align: center; color: var(--renk-metin); font-size: 0.8rem;"></div>
-  </main>
-  <script src=js/main.js></script>
-  <script src=js/ilanlar-veri.js></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/ilanlar.js"></script>
+</body>
 </html>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const favoriler = JSON.parse(localStorage.getItem('favoriler') || '[]');
-  const favButonlar = document.querySelectorAll('.fav-buton');
-  favButonlar.forEach(function(btn) {
-    const ilanId = btn.getAttribute('data-id');
-    btn.style.color = favoriler.includes(ilanId) ? 'var(--renk-ana)' : 'var(--renk-metin)';
-  });
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const favoriler = JSON.parse(localStorage.getItem('favoriler') || '[]');
-  const favButonlar = document.querySelectorAll('[data-id]');
-  favButonlar.forEach(function(btn) {
-    const ilanId = btn.getAttribute('data-id');
-    btn.style.color = favoriler.includes(ilanId) ? 'var(--renk-ana)' : 'var(--renk-metin)';
-  });
-});
-</script>

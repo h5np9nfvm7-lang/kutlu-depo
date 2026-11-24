@@ -1,40 +1,48 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Bizim Emlak - İlan Detayları">
-<meta property="og:description" content="İlan detayları sayfası">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İlan Detayı | Bizim Emlak</title>
+<meta name="description" content="Bizim Emlak ilan detayı.">
+<meta property="og:title" content="İlan Detayı | Bizim Emlak">
 <meta property="og:image" content="images/logo.png">
-<meta property="og:url" content="https://yourdomain.com/ilan.html">
-<meta property="og:type" content="website">
-  <title>Bizim Emlak - İlan Detayları</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#111111">
+<link rel="icon" href="images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<!-- Üst Menü -->
-<header class="header">
-  <a href="index.html" class="logo">
-    <span class="logo-icon">🏠</span> Bizim Emlak
-  </a>
-  <nav>
-    <ul class="nav-links">
-      <li><a href="index.html">Ana Sayfa</a></li>
-      <li><a href="ilanlar.html">İlanlar</a></li>
-      <li><a href="hesaplamalar.html">Hesaplamalar</a></li>
-      <li><a href="rehber.html">Emlak Rehberi</a></li>
-      <li><a href="hakkimizda.html">Hakkımızda</a></li>
-      <li><a href="iletisim.html">İletişim</a></li>
-      <li><a href="favoriler.html">Favoriler</a></li>
-    </ul>
-    <div class="hamburger"><span></span><span></span><span></span></div>
-  </nav>
-</header>
-<!-- İlan Detay Container -->
-<main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-  <div id="ilanDetay" style="display: none; background: var(--renk-beyaz); padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 4rem;"></div>
+<header id="site-ust"></header>
+
+<main>
+  <section class="bolum" style="padding-top:28px">
+    <div class="kap" id="ilan-alan">
+      <div class="detay-duzen">
+        <div>
+          <div class="galeri-ana iskelet"></div>
+          <div class="kart-blok" style="margin-top:24px"><div class="iskelet" style="height:28px;width:60%"></div><div class="iskelet" style="height:16px;width:40%;margin-top:12px"></div></div>
+        </div>
+        <div class="kart-blok"><div class="iskelet" style="height:120px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum bolum-gri gizli" id="benzer-bolum">
+    <div class="kap">
+      <div class="ust-satir"><h2>Benzer İlanlar</h2><a href="ilanlar.html" class="btn btn-cizgi">Tüm İlanlar</a></div>
+      <div class="ilan-izgara" id="benzerler"></div>
+    </div>
+  </section>
 </main>
-<!-- Scripts -->
-<script src="js/main.js"></script>
-<script src="js/ilanlar-veri.js"></script>
-<script>
+
+<footer id="site-alt"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/hesap.js"></script>
+<script src="js/ilan.js"></script>
+</body>
+</html>
