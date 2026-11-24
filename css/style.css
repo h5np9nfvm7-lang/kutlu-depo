@@ -465,3 +465,7 @@ table.tablo { width: 100%; border-collapse: collapse; font-size: .9rem; }
   .site-ust, .site-alt, .wp-sabit, .tel-sabit, .rehber-menu, .duyuru, .sayfa-bas::after { display: none !important; }
   .akordeon details { break-inside: avoid; }
 }
+
+/* Fotoğrafsız ilanda logo yer tutucusu */
+.galeri-ana .resim-yok img { width: 38%; height: auto; object-fit: contain; }
+.galeri-ana:has(.resim-yok) { cursor: default; }

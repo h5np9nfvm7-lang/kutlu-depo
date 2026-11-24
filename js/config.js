@@ -21,7 +21,7 @@ window.BE_CONFIG = {
 
 window.BE_VARSAYILAN_AYARLAR = {
   firma_adi: 'Bizim Emlak',
-  slogan: 'Osmaniye\'de güvenilir gayrimenkul danışmanlığı',
+  slogan: 'Siz hayal edin, biz gerçekleştirelim.',
   telefon: '0328 812 00 00',
   telefon2: '',
   whatsapp: '0328 812 00 00',
@@ -41,7 +41,7 @@ window.BE_VARSAYILAN_AYARLAR = {
   tecrube_yili: 26,
   hizmet_bolgesi: 'Osmaniye Merkez ve ilçeleri',
   danisman_adi: '',
-  hero_baslik: 'Hayalinizdeki Eve Bizimle Ulaşın',
+  hero_baslik: 'Siz Hayal Edin, Biz Gerçekleştirelim',
   hero_alt: '26 yıllık tecrübemizle Osmaniye\'de satılık ve kiralık gayrimenkulde yanınızdayız.',
   hakkimizda_metni: 'Bizim Emlak olarak 26 yıldır Osmaniye\'de gayrimenkul alım, satım ve kiralama alanında hizmet veriyoruz. Müşterilerimizin doğru mülke, doğru fiyatla ve güvenle ulaşmasını en önemli işimiz olarak görüyoruz.\n\nBu metni yönetim panelinden kendi hikâyenizle değiştirebilirsiniz.',
   misyon: 'Alıcı ve satıcıyı dürüst, şeffaf ve hızlı bir süreçle buluşturmak.',

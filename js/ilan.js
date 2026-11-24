@@ -82,7 +82,7 @@
 
       ${i.enlem && i.boylam ? `<div class="kart-blok"><h2>Konum</h2>
         <div class="harita-kutu"><iframe title="İlan konumu haritası" loading="lazy"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=${i.boylam - 0.012}%2C${i.enlem - 0.007}%2C${i.boylam + 0.012}%2C${i.enlem + 0.007}&layer=mapnik&marker=${i.enlem}%2C${i.boylam}"></iframe></div>
+          src="https://www.openstreetmap.org/export/embed.html?bbox=${i.boylam - 0.02}%2C${i.enlem - 0.012}%2C${i.boylam + 0.02}%2C${i.enlem + 0.012}&layer=mapnik&marker=${i.enlem}%2C${i.boylam}"></iframe></div>
         <p style="margin:10px 0 0;font-size:.9rem"><a class="btn btn-cizgi btn-kucuk" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${i.enlem},${i.boylam}">${ikon('harita')} Google Haritalar'da Aç / Yol Tarifi</a></p>
         <p style="font-size:.82rem;color:var(--metin-soluk);margin:8px 0 0">Harita konumu yaklaşık olarak gösterilmektedir.</p></div>` : ''}
 
