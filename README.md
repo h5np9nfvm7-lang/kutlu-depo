@@ -22,13 +22,13 @@ Site **GitHub Pages**'te, ilanlar, mesajlar ve fotoğraflar **Supabase**'de tutu
 2. **Kayıtları kapatın:** **Authentication → Sign In / Providers** sayfasında **"Allow new users to sign up"** seçeneğini kapatın.
 3. **Veritabanı:** Supabase'de **SQL Editor → New query** açın. `supabase-kurulum.sql` dosyasının tamamını yapıştırıp **Run** düğmesine basın. "Success" yazmalı.
 4. **Yayına alma:** GitHub'da deponun **Settings → Pages** bölümüne girin. **Branch: main** ve **/(root)** seçip **Save** düğmesine basın.
-   Site birkaç dakika içinde `https://h5np9nfvm7-lang.github.io/kutlu-depo/` adresinde açılır.
+   Site birkaç dakika içinde `https://bizimemlak.biz` (alan adı Hostinger'da kayıtlı; DNS kayıtları GitHub Pages'e yönlendirildi) adresinde açılır.
 
 > ⚠️ "Anonymous sign-ins" seçeneğini **açmayın**. Sitenin çalışması için gerekli değil.
 
 ## Günlük kullanım: Yönetim paneli
 
-Adres: `https://h5np9nfvm7-lang.github.io/kutlu-depo/admin.html`
+Adres: `https://bizimemlak.biz/admin.html`
 
 - **Yeni ilan:** Fotoğrafları sürükleyip bırakın, bilgileri doldurun ve **İlanı Kaydet** düğmesine basın. Fotoğraflar otomatik olarak küçültülür.
 - **İlanı gizlemek:** İlanlar listesinde "Yayında" düğmesine tıklayın. İlan silinmez, sadece sitede görünmez olur.
