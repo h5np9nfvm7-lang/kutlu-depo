@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Bizim Emlak - İlan Detayları">
+<meta property="og:description" content="İlan detayları sayfası">
+<meta property="og:image" content="images/logo.png">
+<meta property="og:url" content="https://yourdomain.com/ilan.html">
+<meta property="og:type" content="website">
+  <title>Bizim Emlak - İlan Detayları</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- Üst Menü -->
+<header class="header">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">🏠</span> Bizim Emlak
+  </a>
+  <nav>
+    <ul class="nav-links">
+      <li><a href="index.html">Ana Sayfa</a></li>
+      <li><a href="ilanlar.html">İlanlar</a></li>
+      <li><a href="hesaplamalar.html">Hesaplamalar</a></li>
+      <li><a href="rehber.html">Emlak Rehberi</a></li>
+      <li><a href="hakkimizda.html">Hakkımızda</a></li>
+      <li><a href="iletisim.html">İletişim</a></li>
+      <li><a href="favoriler.html">Favoriler</a></li>
+    </ul>
+    <div class="hamburger"><span></span><span></span><span></span></div>
+  </nav>
+</header>
+<!-- İlan Detay Container -->
+<main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+  <div id="ilanDetay" style="display: none; background: var(--renk-beyaz); padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 4rem;"></div>
+</main>
+<!-- Scripts -->
+<script src="js/main.js"></script>
+<script src="js/ilanlar-veri.js"></script>
+<script>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Bizim Emlak - İlanlar">
+<meta property="og:description" content="İlanlar sayfası - Osmaniye emlak bilgileri">
+<meta property="og:image" content="images/logo.png">
+<meta property="og:url" content="https://yourdomain.com/ilanlar">
+<meta property="og:type" content="website">
+  <title>Bizim Emlak - İlanlar</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Üst Menü (Header) -->
+  <header class="header">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">🏠</span> Bizim Emlak
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="ilanlar.html">İlanlar</a></li>
+        <li><a href="hesaplamalar.html">Hesaplamalar</a></li>
+        <li><a href="rehber.html">Emlak Rehberi</a></li>
+        <li><a href="hakkimizda.html">Hakkımızda</a></li>
+        <li><a href="iletisim.html">İletişim</a></li>
+        <li><a href="favoriler.html">Favoriler</a></li>
+      </ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </nav>
+  </header>
+
+  <!-- Ana İçerik -->
+  <main style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+    <!-- Filtre Paneli -->
+    <div id="filterPanel" style="display: block; background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; max-height: 500px; overflow-y: auto;">
+      <h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem; font-size: 1.2rem;">Filtreler</h3>
+      <button id="closeFilterBtn" style="width: 100%; background: none; border: none; color: var(--renk-metin); font-size: 0.9rem; margin-bottom: 1rem; text-align: left; padding: 0.5rem;">X</button>
+      <div style="margin-bottom: 1rem;">
+        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Satılık / Kiralık</label>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+          <label><input type="radio" name="filterTip" value="satılık" id="tipSatilik"> Satılık</label>
+          <label><input type="radio" name="filterTip" value="kiralık" id="tipKiralik"> Kiralık</label>
+          <label><input type="radio" name="filterTip" value="Tümü" id="tipTümü" checked> Tümü</label>
+        </div>
+      </div>
+      <!-- Kategori (Çoklu seçim) -->
+      <div style="margin-bottom: 1rem;">
+        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Kategori</label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem;">
+          <label><input type="checkbox" name="filterKategori" value="Daire" id="catDaire"> Daire</label>
+          <label><input type="checkbox" name="filterKategori" value="Villa" id="catVilla"> Villa</label>
+          <label><input type="checkbox" name="filterKategori" value="Müstakil Ev" id="catMustakil"> Müstakil Ev</label>
+          <label><input type="checkbox" name="filterKategori" value="Arsa" id="catArsa"> Arsa</label>
+          <label><input type="checkbox" name="filterKategori" value="Dükkan" id="catDukkan"> Dükkan</label>
+          <label><input type="checkbox" name="filterKategori" value="Ofis" id="catOfis"> Ofis</label>
+        </div>
+      </div>
+      
+      <!-- İl / İlçe -->
+      <div style="margin-bottom: 1rem;">
+        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">İl / İlçe</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <select name="filterIl" id="filterIl" onchange="updateIlce(this.value)">
+            <option value="Tümü">Tümü</option>
+            <option value="Osmaniye">Osmaniye</option>
+            <option value="Yenişehir">Yenişehir</option>
+            <option value="Villasaray">Villasaray</option>
+            <option value="Favori">Favori</option>
+          </select>
+          <select name="filterIlce" id="filterIlce">
+            <option value="Tümü">Tümü</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Fiyat Aralığı -->
+      <div style="margin-bottom: 1rem;">
+        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Fiyat Aralığı (₺)</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <input type="number" id="fiyatMin" placeholder="Min" style="padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);">
+          <input type="number" id="fiyatMax" placeholder="Max" style="padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);">
+        </div>
+      </div>
+      
+      <!-- Oda Sayısı -->
+      <div style="margin-bottom: 1rem;">
+        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Oda Sayısı</label>
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;">
+          <label><input type="checkbox" name="filterOda" value="0+0" id="oda00"> 0+0</label>
+          <label><input type="checkbox" name="filterOda" value="1+1" id="oda11"> 1+1</label>
+          <label><input type="checkbox" name="filterOda" value="2+1" id="oda21"> 2+1</label>
+          <label><input type="checkbox" name="filterOda" value="3+1" id="oda31"> 3+1</label>
+          <label><input type="checkbox" name="filterOda" value="4+1" id="oda41"> 4+1</label>
+          <label><input type="checkbox" name="filterOda" value="5+" id="oda5"> 5+</label>
+        </div>
+      </div>
+      
+      <!-- Eşyalı ve Sistemler -->
+      <div style="margin-bottom: 1rem;">
+        <label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem; display: block;">Özellikler</label>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+          <label><input type="checkbox" name="filterEsyali" id="esyali"> Eşyalı</label>
+          <label><input type="checkbox" name="filterKrediye" id="krediye"> Krediye Uygun</label>
+          <label><input type="checkbox" name="filterSiteici" id="siteici"> Site İçi</label>
+          <label><input type="checkbox" name="filterOtopark" id="otopark"> Otopark</label>
+        </div>
+        <div style="margin-top: 1rem; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+          <label><input type="checkbox" name="filterAsansor" id="asansor"> Asansör</label>
+          <label><input type="checkbox" name="filterBalkon" id="balkon"> Balkon</label>
+          <label><input type="checkbox" name="filterGaraj" id="garaj"> Garaj</label>
+          <label><input type="checkbox" name="filterLift" id="lift"> Lift</label>
+        </div>
+      </div>
+      
+      <!-- Butonlar -->
+      <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--renk-kenarik);">
+        <button id="applyFilters" style="width: 100%; background: var(--renk-ana); color: var(--renk-beyaz); border: none; padding: 0.8rem; font-family: var(--font-baslik); font-size: 0.9rem; cursor: pointer;">Filtrele</button>
+        <button id="clearFilters" style="width: 100%; background: var(--renk-arapa); color: var(--renk-metin); border: 1px solid var(--renk-kenarik); padding: 0.8rem; font-family: var(--font-baslik); font-size: 0.9rem; margin-top: 0.5rem; cursor: pointer;">Filtreleri Temizle</button>
+      </div>
+    </div>
+    <!-- Mobil Filtre Butonu -->
+    <div id="mobileFilterBtn" style="display: block; width: 100%; background: var(--renk-ana); color: var(--renk-beyaz); padding: 0.8rem; font-family: var(--font-baslik); font-size: 1rem; cursor: pointer; margin: 2rem 0 0 0; text-align: center;">Filtrele</div>
+
+    <!-- Sonuçlar -->
+    <section id="sonucBilgisi" style="margin-bottom: 2rem; text-align: center; color: var(--renk-metin); font-size: 0.9rem;">
+      <span id="ilanSayisi">0</span> ilan bulundu
+    </section>
+
+    <!-- Sıralama ve Görünüm -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap;">
+      <select id="sirala" style="flex: 1; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin); font-size: 0.8rem;">
+        <option value="yenilik">En Yeni</option>
+        <option value="fiyatArtan">Fiyat (Artan)</option>
+        <option value="fiyatAzalan">Fiyat (Azalan)</option>
+        <option value="m2Kucuk">m² (Küçükten Büyük)</option>
+      </select>
+      <select id="gorunum" style="flex: 1; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin); font-size: 0.8rem;">
+        <option value="izgara">Izgara</option>
+        <option value="liste">Liste</option>
+      </select>
+      <span style="margin-left: 1rem; font-size: 0.8rem; color: var(--renk-metin);">9 ilan / sayfa</span>
+    </div>
+
+    <!-- İlannar Listesi -->
+    <div id="ilanlarContainer" style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 400px;"></div>
+
+    <!-- Sayfalama -->
+    <div id="sayfalama" style="margin-top: 2rem; text-align: center; color: var(--renk-metin); font-size: 0.8rem;"></div>
+  </main>
+  <script src=js/main.js></script>
+  <script src=js/ilanlar-veri.js></script>
+</html>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const favoriler = JSON.parse(localStorage.getItem('favoriler') || '[]');
+  const favButonlar = document.querySelectorAll('.fav-buton');
+  favButonlar.forEach(function(btn) {
+    const ilanId = btn.getAttribute('data-id');
+    btn.style.color = favoriler.includes(ilanId) ? 'var(--renk-ana)' : 'var(--renk-metin)';
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const favoriler = JSON.parse(localStorage.getItem('favoriler') || '[]');
+  const favButonlar = document.querySelectorAll('[data-id]');
+  favButonlar.forEach(function(btn) {
+    const ilanId = btn.getAttribute('data-id');
+    btn.style.color = favoriler.includes(ilanId) ? 'var(--renk-ana)' : 'var(--renk-metin)';
+  });
+});
+</script>

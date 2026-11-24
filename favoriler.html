@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bizim Emlak - Favorilerim</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Üst Menü -->
+  <header class="header">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">🏠</span> Bizim Emlak
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="ilanlar.html">İlanlar</a></li>
+        <li><a href="hesaplamalar.html">Hesaplamalar</a></li>
+        <li><a href="rehber.html">Emlak Rehberi</a></li>
+        <li><a href="hakkimizda.html">Hakkımızda</a></li>
+        <li><a href="iletisim.html">İletişim</a></li>
+        <li><a href="favoriler.html">Favoriler</a></li>
+      </ul>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </nav>
+  </header>
+
+  <!-- Ana İçerik -->
+  <main style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+    <!-- Favori Sayacı -->
+    <div style="text-align: center; margin-bottom: 2rem;" id="favCounter">
+      <span style="font-family: var(--font-baslik); font-size: 1.5rem; color: var(--renk-ana);">0</span> favori
+    </div>
+
+    <!-- Favori İlanlar -->
+    <div id="favorilerListe" style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 300px;">
+      <p style="text-align: center; color: var(--renk-metin); padding: 2rem;">Henüz favori ilanınız yok</p>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/ilanlar-veri.js"></script>
+  <script>
+    // Favori verileri localStorage'ten
+    const favoriler = JSON.parse(localStorage.getItem('favoriler') || '[]');
+    const favCounter = document.getElementById('favCounter');
+    
+    // Favori sayacını güncelle
+    function guncelleFavCounter() {
+      const sayac = document.getElementById('favCounter');
+      sayac.textContent = favoriler.length;
+    }
+    
+    // Favileye ekle/kaldır
+    window.faviliyeEkle = function(ilanId) {
+      if (favoriler.includes(ilanId)) {
+        favoriler.splice(favoriler.indexOf(ilanId), 1);
+      } else {
+        favoriler.push(ilanId);
+      }
+      localStorage.setItem('favoriler', JSON.stringify(favoriler));
+      guncelleFavCounter();
+      favileriYenile();
+    }
+    
+    // Favori ilanları göster
+    function favileriYenile() {
+      const container = document.getElementById('favorilerListe');
+      
+      if (favoriler.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--renk-metin); padding: 2rem;">Henüz favori ilanınız yok</p>';
+        guncelleFavCounter();
+        return;
+      }
+      
+      const ilanlar = ilanlarVeri; // global değişken
+      let html = '';
+      favoriler.forEach(ilanId => {
+        const ilan = ilanlar.find(i => i.id == ilanId);
+        if (ilan) {
+          const ozellikler = ilan.ozellikler ? ilan.ozellikler : [];
+          const resimler = ilan.resimler ? ilan.resimler : ['placeholder.jpg'];
+          html += '<div style="background: var(--renk-beyaz); padding: 1rem; margin-bottom: 0.5rem; border-radius: 8px; border-left: 4px solid var(--renk-ana);">';
+          html += '<div style="height: 80px; background: #f5f5f5; border-radius: 6px; overflow: hidden; margin-bottom: 0.5rem;">';
+          html += '<img src="images/" + resimler[0] + '" alt="' + ilan.baslik + '" style="width: 100%; height: 80px; object-fit: cover;">';
+          html += '</div>';
+          html += '<div>';
+          html += '<h4 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin: 0.3rem 0 0.2rem;">' + ilan.baslik + '</h4>';
+          html += '<p style="font-size: 0.75rem; color: var(--renk-metin); margin: 0.2rem 0;">' + ilan.fiyat + '</p>';
+          html += '</div>';
+          html += '</div>';
+        }
+      });
+      
+      container.innerHTML = html;
+      guncelleFavCounter();
+    }
+    
+    // Sayfa yüklendiğinde
+    favileriYenile();
+    
+    // Favori butonlarına tıklandığında çalış
+    document.querySelectorAll('.fav-buton').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const ilanId = btn.getAttribute('data-id');
+        faviliyeEkle(ilanId);
+      });
+    });
+  </script>
+</body>
+</html>

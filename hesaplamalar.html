@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Bizim Emlak - Hesaplamalar">
+<meta property="og:description" content="Emlak hesaplama araçları">
+<meta property="og:image" content="images/logo.png">
+<meta property="og:url" content="https://yourdomain.com/hesaplamalar">
+<meta property="og:type" content="website">
+<title>Bizim Emlak - Hesaplamalar</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- Üst Menü -->
+<header class="header">
+<a href="index.html" class="logo">
+<span class="logo-icon">🏠</span> Bizim Emlak
+</a>
+<nav>
+<ul class="nav-links">
+<li><a href="index.html">Ana Sayfa</a></li>
+<li><a href="ilanlar.html">İlanlar</a></li>
+<li><a href="hesaplamalar.html">Hesaplamalar</a></li>
+<li><a href="rehber.html">Emlak Rehberi</a></li>
+<li><a href="hakkimizda.html">Hakkımızda</a></li>
+<li><a href="iletisim.html">İletişim</a></li>
+<li><a href="favoriler.html">Favoriler</a></li>
+</ul>
+<div class="hamburger"><span></span><span></span><span></span></div>
+</nav>
+</header>
+<!-- Sekmeler -->
+<div class="tab-container" style="margin-bottom: 2rem;">
+<button class="tab-btn active" onclick="openTab('kredi', this)">Konut Kredisi Hesaplama</button>
+<button class="tab-btn" onclick="openTab('tapu', this)">Tapu Harcı Hesaplama</button>
+<button class="tab-btn" onclick="openTab('kira', this)">Kira Getirisi Hesaplama</button>
+<button class="tab-btn" onclick="openTab('butce', this)">Bütçe Hesaplama</button>
+</div>
+<!-- Tab İçikleri -->
+<div id="tab-kredi" class="tab-content active">
+<div class="calc-card" style="margin-bottom: 2rem;">
+<h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem;">Konut Kredisi Hesaplama</h3>
+<div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--renk-kenarik);">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+<div>
+<label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Kredi Tutarı (₺)</label>
+<input type="number" id="kredi-miktari" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="1.000.000" min="1000" placeholder="Kredi miktarını girin">
+</div>
+<div>
+<label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Vade (ay)</label>
+<input type="number" id="kredi-vade" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="120" min="6" placeholder="Ay sayısı">
+</div>
+<div>
+<label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Faiz Oranı (%)</label>
+<input type="number" id="kredi-faiz" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="1.5" step="0.1" min="0.1" placeholder="Yıllık faiz oranı">
+</div>
+</div>
+<div style="background: var(--renk-arapa); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+<h4 style="font-family: var(--font-baslik); color: var(--renk-ana); margin-bottom: 1rem;">Hesaplama Sonuçları</h4>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 1.2rem;">
+<div>
+<strong>Aylık Taksit</strong>
+<p id="kredi-taksit" style="color: var(--renk-ana); font-size: 1.5rem;">0 ₺</p>
+</div>
+<div>
+<strong>Toplam Geri Ödeme</strong>
+<p id="kredi-toplam" style="color: var(--renk-metin); font-size: 1.2rem;">0 ₺</p>
+</div>
+<div>
+<strong>Toplam Faiz</strong>
+<p id="kredi-faiz-miktari" style="color: var(--renk-metin); font-size: 1.2rem;">0 ₺</p>
+</div>
+</div>
+<details style="font-family: var(--font-metin); margin-top: 2rem;">
+<summary style="font-size: 1rem; cursor: pointer; color: var(--renk-siyah);">İlk 12 Ayın Ödeme Tablosu</summary>
+<table style="width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.8rem;">
+<thead>
+<tr style="background: var(--renk-arapa);"><th style="padding: 0.5rem;">Ay</th><th style="padding: 0.5rem;">Ana</th><th style="padding: 0.5rem;">Faiz</th><th style="padding: 0.5rem;">Kalan Borç</th></tr>
+</thead>
+<tbody id="odeme-tablosu">
+</tbody>
+</details>
+<p style="margin-top: 1rem; font-size: 0.8rem; color: var(--renk-metin);" id="kredi-uyarı">Bu hesaplamalar bilgi amaçlıdır, kesin rakamlar için bankanıza danışın</p>
+<div id="tab-tapu" class="tab-content"><div class="calc-card" style="margin-bottom: 2rem;"><h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem;">Tapu Harcı Hesaplama</h3><div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--renk-kenarik);"><div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;"><div><label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Satış Bedeli (₺)</label><input type="number" id="tapu-bedeli" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="500.000" min="1" placeholder="Satış bedelini girin"></div><div><label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Alıcı Payı (%)</label><input type="number" id="tapu-alıcı" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="2" min="0" max="100" placeholder="%"></div><div><label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Satıcı Payı (%)</label><input type="number" id="tapu-satıcı" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="2" min="0" max="100" placeholder="%"></div></div><div style="margin-bottom: 1rem;"><p style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); margin-bottom: 0.5rem;">Oranlar Değişken:</p><p style="font-size: 0.7rem; color: #666; margin: 0;">Varsayılan: Alıcı %2 + Satıcı %2 = Toplam %4<br>Güncel oranı Tapu Müdürlüğünden teyit edin</p></div><div style="background: var(--renk-arapa); padding: 1rem; border-radius: 4px;"><h4 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 0.5rem;">Tapu Harcı Sonuçları</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 1.1rem;"><div><strong>Alıcı Harcı</strong><p id="tapu-alıcı-harci" style="color: var(--renk-ana); font-size: 1.2rem;">0 ₺</p></div><div><strong>Satıcı Harcı</strong><p id="tapu-satıcı-harci" style="color: var(--renk-ana); font-size: 1.2rem;">0 ₺</p></div><div><strong>Toplam Harcı</strong><p id="tapu-toplam-harci" style="color: var(--renk-metin); font-size: 1.2rem;">0 ₺</p></div></div></div><p style="margin-top: 1rem; font-size: 0.8rem; color: var(--renk-metin);" id="tapu-uyarı">Bu hesaplamalar bilgi amaçlıdır, kesin rakamlar için tapu müdürlüğünden teyit edin</p></div>
+</div>
+
+    <!-- Tab İçikleri -->
+<div id="tab-kira" class="tab-content"><div class="calc-card" style="margin-bottom: 2rem;"><h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem;">Kira Getirisi (Amortisman) Hesaplama</h3><div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--renk-kenarik);"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;"><div><label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Ev Fiyatı (₺)</label><input type="number" id="kira-fiyat" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="2000000" min="1" placeholder="Ev fiyatını girin"></div><div><label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Aylık Kira (₺)</label><input type="number" id="kira-kira" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="5000" min="1" placeholder="Aylık kira miktarı"></div></div><div><label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Süre (Yıl)</label><input type="number" id="kira-yil" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="5" min="1" placeholder="Yıl sayısı"></div></div><div style="background: var(--renk-arapa); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;"><h4 style="font-family: var(--font-baslik); color: var(--renk-ana); margin-bottom: 1rem;">Hesaplama Sonuçları</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 1.1rem;"><div><strong>Yıllık Brüt Getiri</strong><p id="kira-getiri" style="color: var(--renk-ana); font-size: 1.2rem;">0 ₺</p></div><div><strong>Toplam Kirad</strong><p id="kira-toplam-kira" style="color: var(--renk-metin); font-size: 1.2rem;">0 ₺</p></div></div><div><strong>Yıllık Net Getiri Yüzdesi</strong><p id="kira-yuzde" style="color: var(--renk-metin); font-size: 1.2rem;">0 %</p></div></div></div>
+<div id="tab-butce" class="tab-content"><div class="calc-card" style="margin-bottom: 2rem;"><h3 style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1.5rem;">Ne Kadarlık Ev Alabilirim?</h3><div style="background: var(--renk-beyaz); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--renk-kenarik);"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;"><div><label style="font-family: var(--font-metin); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Aylık Net Gelir (₺)</label><input type="number" id="butce-gelir" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="3000" min="1" placeholder="Net aylık income"></div><div><label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Birikim (₺)</label><input type="number" id="butce-birikim" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="100000" min="0" placeholder="Mevcut birikim"></div></div><div><label style="font-family: var(--font-baslik); font-size: 0.85rem; color: var(--renk-metin); display: block; margin-bottom: 0.5rem;">Mevcut Aylık Borçlar (₺)</label><input type="number" id="butce-borc" style="width: 100%; padding: 0.5rem; border: 1px solid var(--renk-kenarik); border-radius: 4px; font-family: var(--font-metin);" value="0" min="0" placeholder="Kredi, kart vb."></div></div><p style="font-family: var(--font-baslik); color: var(--renk-siyah); margin-bottom: 1rem;">Krediye Uygun Oran: %40</p></div><div style="background: var(--renk-arapa); padding: 1.5rem; border-radius: 8px; margin-top: 1rem; font-family: var(--font-metin);"><h4 style="font-family: var(--font-baslik); color: var(--renk-ana); margin-bottom: 1rem;">Bütçe Sonuçları</h4><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 1.1rem;"><div><strong>Maksimum Krediye Uygun Fiyat</strong><p id="butce-fiyat" style="color: var(--renk-ana); font-size: 1.2rem;">0 ₺</p></div><div><strong>Krediye Uygun Tutar</strong><p id="butce-kredi" style="color: var(--renk-metin); font-size: 1.2rem;">0 ₺</p></div></div><div><strong>Örnek Aylık Taksit (örnek %40 oranında)</strong><p id="butce-taksit" style="color: var(--renk-metin); font-size: 1rem;">0 ₺</p></div></div><p style="margin-top: 1rem; font-size: 0.8rem; color: var(--renk-metin);" id="butce-uyarı">Bu hesaplamalar bilgi amaçlıdır, kesin rakamlar için bankanıza danışın</p></div>
+
+    <!-- Tab İçileri -->
