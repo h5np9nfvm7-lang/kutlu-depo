@@ -47,7 +47,7 @@
   const fav = BE.favoriMi(i.id);
 
   alan.innerHTML = `
-  <div class="yol" style="color:var(--metin-soluk)"><a href="index.html">Ana Sayfa</a> / <a href="ilanlar.html">İlanlar</a> / <a href="ilanlar.html?kategori=${encodeURIComponent(i.kategori)}">${esc(i.kategori)}</a> / #${i.id}</div>
+  <div class="yol" style="color:var(--metin-soluk)"><a href="./">Ana Sayfa</a> / <a href="ilanlar.html">İlanlar</a> / <a href="ilanlar.html?kategori=${encodeURIComponent(i.kategori)}">${esc(i.kategori)}</a> / #${i.id}</div>
   <div class="detay-duzen">
     <div>
       <div class="galeri">

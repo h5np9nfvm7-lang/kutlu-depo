@@ -244,11 +244,11 @@
       <div class="sag"><span>${BE.ikon('saat')} Bugün: ${BE.esc(BE.saatMetni(bugun))}</span></div>
     </div></div>
     <div class="kap menu-kap">
-      <a href="index.html" class="logo" aria-label="${BE.esc(a.firma_adi)} ana sayfa"><img src="images/logo.png" alt="${BE.esc(a.firma_adi)}" width="351" height="128"></a>
+      <a href="./" class="logo" aria-label="${BE.esc(a.firma_adi)} ana sayfa"><img src="images/logo.png" alt="${BE.esc(a.firma_adi)}" width="351" height="128"></a>
       <button class="menu-ac" aria-label="Menüyü aç" aria-expanded="false" aria-controls="ana-menu">${BE.ikon('menu')}</button>
       <nav class="ana-menu" id="ana-menu" aria-label="Ana menü">
         <button class="menu-ac menu-kapat" aria-label="Menüyü kapat">${BE.ikon('kapat')}</button>
-        ${MENU.map(([u, t]) => `<a href="${u}" ${u === aktif ? 'class="aktif" aria-current="page"' : ''}>${t}</a>`).join('')}
+        ${MENU.map(([u, t]) => `<a href="${u === 'index.html' ? './' : u}" ${u === aktif ? 'class="aktif" aria-current="page"' : ''}>${t}</a>`).join('')}
         <a href="favoriler.html" class="fav-link ${aktif === 'favoriler.html' ? 'aktif' : ''}" aria-label="Favorilerim">${BE.ikon('kalp')} <span class="fav-yazi">Favoriler</span> <span class="fav-sayi"></span></a>
       </nav>
     </div>`;
@@ -267,7 +267,7 @@
       </div>
       <div>
         <h4>Hızlı Linkler</h4>
-        <ul>${MENU.map(([u, t]) => `<li><a href="${u}">${t}</a></li>`).join('')}<li><a href="favoriler.html">Favorilerim</a></li></ul>
+        <ul>${MENU.map(([u, t]) => `<li><a href="${u === 'index.html' ? './' : u}">${t}</a></li>`).join('')}<li><a href="favoriler.html">Favorilerim</a></li></ul>
       </div>
       <div>
         <h4>İletişim</h4>
