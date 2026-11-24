@@ -93,15 +93,6 @@
         <p style="margin:10px 0 0;font-size:.9rem"><a class="btn btn-cizgi btn-kucuk" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${i.enlem},${i.boylam}">${ikon('harita')} Google Haritalar'da Aç / Yol Tarifi</a></p>
         <p style="font-size:.82rem;color:var(--metin-soluk);margin:8px 0 0">Harita konumu yaklaşık olarak gösterilmektedir.</p></div>` : ''}
 
-      ${BE.aktifMi(i) && i.tip === 'Satılık' && i.fiyat ? `<div class="kart-blok" id="kredi-blok"><h2>Kredi Hesapla</h2>
-        <div class="form-izgara">
-          <label class="alan"><span>Ev Fiyatı (TL)</span><input type="text" inputmode="numeric" id="k-fiyat" value="${BE.sayi(i.fiyat)}"></label>
-          <label class="alan"><span>Peşinat (TL)</span><input type="text" inputmode="numeric" id="k-pesinat" value="${BE.sayi(Math.round(i.fiyat * 0.2))}"></label>
-          <label class="alan"><span>Vade (ay)</span><select id="k-vade">${[12, 24, 36, 48, 60, 84, 120].map((v) => `<option ${v === 120 ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
-          <label class="alan"><span>Aylık Faiz Oranı (%)</span><input type="text" inputmode="decimal" id="k-faiz" placeholder="Bankanızın oranını yazın, örn. 2,5"></label>
-        </div>
-        <div class="sonuc-kutu" id="k-sonuc"><span style="color:var(--metin-soluk)">Taksiti görmek için faiz oranını yazın.</span></div>
-        <p class="uyari-not">Bu hesaplama bilgi amaçlıdır. Kesin oranlar ve masraflar için bankanıza danışın.</p></div>` : ''}
     </div>
 
     <aside>
@@ -181,23 +172,6 @@
     try { await navigator.clipboard.writeText(location.href); BE.bildirim('İlan linki kopyalandı'); }
     catch { BE.bildirim('Linki adres çubuğundan kopyalayabilirsiniz'); }
   });
-
-  // Kredi hesaplama
-  if ($('#kredi-blok')) {
-    ['#k-fiyat', '#k-pesinat'].forEach((s) => H.bicimle($(s)));
-    const hesapla = () => {
-      const fiyat = H.oku($('#k-fiyat').value), pes = H.oku($('#k-pesinat').value);
-      const faiz = H.oku($('#k-faiz').value), vade = Number($('#k-vade').value);
-      const kredi = fiyat - pes;
-      if (!$('#k-faiz').value.trim() || kredi <= 0) { $('#k-sonuc').innerHTML = '<span style="color:var(--metin-soluk)">Taksiti görmek için faiz oranını yazın.</span>'; return; }
-      const s = H.kredi(kredi, faiz, vade);
-      $('#k-sonuc').innerHTML = `<div class="sonuc-satir"><span>Aylık Taksit</span><span class="buyuk">${BE.tl(s.taksit)}</span></div>
-        <div class="sonuc-satir"><span>Kredi Tutarı</span><strong>${BE.tl(kredi)}</strong></div>
-        <div class="sonuc-satir"><span>Toplam Geri Ödeme</span><strong>${BE.tl(s.toplam)}</strong></div>
-        <div class="sonuc-satir"><span>Toplam Faiz</span><strong>${BE.tl(s.toplamFaiz)}</strong></div>`;
-    };
-    ['#k-fiyat', '#k-pesinat', '#k-faiz', '#k-vade'].forEach((s) => $(s).addEventListener('input', hesapla));
-  }
 
   // Sizi arayalım formu
   $('#ilan-form').addEventListener('submit', async (e) => {

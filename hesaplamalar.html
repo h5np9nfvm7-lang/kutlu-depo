@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hesaplama Araçları | Bizim Emlak</title>
-<meta name="description" content="Konut kredisi, tapu harcı, kira getirisi ve ev bütçesi hesaplama araçları.">
+<meta name="description" content="Tapu harcı ve kira getirisi (amortisman) hesaplama araçları.">
 <meta property="og:title" content="Emlak Hesaplama Araçları | Bizim Emlak">
 <meta property="og:image" content="https://bizimemlak.biz/images/logo.png">
 <meta name="theme-color" content="#111111">
@@ -13,7 +13,7 @@
 <link rel="icon" href="images/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 <header id="site-ust"></header>
@@ -30,36 +30,12 @@
   <section class="bolum" style="padding-top:36px">
     <div class="kap">
       <div class="sekmeler" role="tablist">
-        <button type="button" role="tab" class="aktif" data-sekme="kredi">Konut Kredisi</button>
-        <button type="button" role="tab" data-sekme="tapu">Tapu Harcı</button>
+        <button type="button" role="tab" class="aktif" data-sekme="tapu">Tapu Harcı</button>
         <button type="button" role="tab" data-sekme="kira">Kira Getirisi</button>
-        <button type="button" role="tab" data-sekme="butce">Ne Kadarlık Ev Alabilirim?</button>
-      </div>
-
-      <!-- KREDİ -->
-      <div class="sekme-icerik" id="s-kredi" role="tabpanel">
-        <div class="hesap-duzen">
-          <div class="kart-blok"><h2>Konut Kredisi Hesaplama</h2>
-            <div class="form-izgara">
-              <label class="alan tam"><span>Kredi Tutarı (TL)</span><input type="text" inputmode="numeric" id="kr-tutar" placeholder="Örn. 1.500.000" class="para"></label>
-              <label class="alan"><span>Vade (ay)</span>
-                <select id="kr-vade"><option>12</option><option>24</option><option>36</option><option>48</option><option>60</option><option>84</option><option selected>120</option><option>180</option></select>
-              </label>
-              <label class="alan"><span>Aylık Faiz Oranı (%)</span><input type="text" inputmode="decimal" id="kr-faiz" placeholder="Örn. 2,5"></label>
-            </div>
-            <p class="uyari-not">Güncel faiz oranını bankanızdan öğrenip yazın. Bu hesaplama bilgi amaçlıdır; dosya masrafı, sigorta gibi ek ücretler dahil değildir.</p>
-          </div>
-          <div class="kart-blok"><h2>Sonuç</h2>
-            <div id="kr-sonuc"><p style="color:var(--metin-soluk)">Kredi tutarını ve faiz oranını yazın.</p></div>
-            <details id="kr-plan-kap" class="gizli" style="margin-top:16px"><summary style="cursor:pointer;font-weight:700">Ödeme planını göster</summary>
-              <div class="tablo-kap" style="margin-top:12px"><table class="tablo" id="kr-plan"></table></div>
-            </details>
-          </div>
-        </div>
       </div>
 
       <!-- TAPU -->
-      <div class="sekme-icerik gizli" id="s-tapu" role="tabpanel">
+      <div class="sekme-icerik" id="s-tapu" role="tabpanel">
         <div class="hesap-duzen">
           <div class="kart-blok"><h2>Tapu Harcı Hesaplama</h2>
             <div class="form-izgara">
@@ -88,26 +64,8 @@
         </div>
       </div>
 
-      <!-- BÜTÇE -->
-      <div class="sekme-icerik gizli" id="s-butce" role="tabpanel">
-        <div class="hesap-duzen">
-          <div class="kart-blok"><h2>Ne Kadarlık Ev Alabilirim?</h2>
-            <div class="form-izgara">
-              <label class="alan"><span>Aylık Net Hane Geliri (TL)</span><input type="text" inputmode="numeric" id="bu-gelir" class="para" placeholder="Örn. 60.000"></label>
-              <label class="alan"><span>Mevcut Aylık Borç Ödemeleri (TL)</span><input type="text" inputmode="numeric" id="bu-borc" class="para" placeholder="Kredi kartı, taşıt kredisi vb."></label>
-              <label class="alan"><span>Birikiminiz / Peşinat (TL)</span><input type="text" inputmode="numeric" id="bu-birikim" class="para" placeholder="Örn. 500.000"></label>
-              <label class="alan"><span>Gelirin Ne Kadarı Taksite Gidebilir (%)</span><input type="text" inputmode="decimal" id="bu-oran" value="40"></label>
-              <label class="alan"><span>Vade (ay)</span><select id="bu-vade"><option>60</option><option>84</option><option selected>120</option><option>180</option></select></label>
-              <label class="alan"><span>Aylık Faiz Oranı (%)</span><input type="text" inputmode="decimal" id="bu-faiz" placeholder="Örn. 2,5"></label>
-            </div>
-            <p class="uyari-not">Bankalar kredi verirken gelir belgesi, kredi notu ve ev değerine göre farklı sınırlar uygular. Sonuç yaklaşık bir tahmindir.</p>
-          </div>
-          <div class="kart-blok"><h2>Sonuç</h2><div id="bu-sonuc"><p style="color:var(--metin-soluk)">Gelir, birikim ve faiz oranını yazın.</p></div></div>
-        </div>
-      </div>
-
       <div class="cagri" style="margin-top:20px">
-        <div><h2>Hesaplamalarda yardıma mı ihtiyacınız var?</h2><p>Kredi ve tapu süreçlerinde size ücretsiz yol gösterelim.</p></div>
+        <div><h2>Hesaplamalarda yardıma mı ihtiyacınız var?</h2><p>Tapu ve satış süreçlerinde size ücretsiz yol gösterelim.</p></div>
         <div class="butonlar"><a href="iletisim.html" class="btn btn-kirmizi">Bize Ulaşın</a></div>
       </div>
     </div>
@@ -117,9 +75,9 @@
 <footer id="site-alt"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=6"></script>
-<script src="js/common.js?v=6"></script>
-<script src="js/hesap.js?v=6"></script>
-<script src="js/hesaplamalar.js?v=6"></script>
+<script src="js/config.js?v=7"></script>
+<script src="js/common.js?v=7"></script>
+<script src="js/hesap.js?v=7"></script>
+<script src="js/hesaplamalar.js?v=7"></script>
 </body>
 </html>
