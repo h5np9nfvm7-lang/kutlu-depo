@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>İletişim | Bizim Emlak Osmaniye</title>
-<meta name="description" content="Bizim Emlak iletişim bilgileri, adres, çalışma saatleri ve iletişim formu. Mülkünüzü satmak veya kiralamak için bize ulaşın.">
+<meta name="description" content="Bizim Emlak iletişim bilgileri, adres, çalışma saatleri ve iletişim formu. Mülkünüzü satmak, kiralamak veya aradığınız evi bildirmek için bize ulaşın.">
 <meta property="og:title" content="İletişim | Bizim Emlak">
 <meta property="og:image" content="https://bizimemlak.biz/images/logo.png">
 <meta name="theme-color" content="#111111">
@@ -13,7 +13,7 @@
 <link rel="icon" href="images/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 <header id="site-ust"></header>
@@ -62,6 +62,7 @@
             </label>
             <label class="alan tam"><span>Mesajınız *</span><textarea name="mesaj" required maxlength="3000"></textarea></label>
           </div>
+          <div class="kvkk-yer"></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
             <button type="submit" class="btn btn-kirmizi">Mesajı Gönder</button>
             <button type="button" class="btn btn-wp gizli" data-wp-form="iletisim-form">WhatsApp ile Gönder</button>
@@ -85,9 +86,44 @@
             <label class="alan"><span>Beklediğiniz Fiyat (TL)</span><input type="text" name="fiyat" maxlength="30" inputmode="numeric"></label>
             <label class="alan tam"><span>Eklemek istedikleriniz</span><textarea name="not" maxlength="1500" style="min-height:80px"></textarea></label>
           </div>
+          <div class="kvkk-yer"></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
             <button type="submit" class="btn btn-siyah">Değerleme İste</button>
             <button type="button" class="btn btn-wp gizli" data-wp-form="mulk-form">WhatsApp ile Gönder</button>
+          </div>
+          <div class="sonuc" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+  <section class="bolum bolum-gri" id="ev-talebi">
+    <div class="kap iki-kolon">
+      <div>
+        <h2>Aradığınız Evi Bize Bildirin</h2>
+        <p style="color:var(--metin-soluk)">Aradığınız mülkün özelliklerini bırakın; portföyümüze uygun bir ilan geldiğinde sizi ilk biz arayalım.
+          Sitede henüz yayınlanmamış fırsatlardan da haberdar olursunuz.</p>
+        <div class="kutu" style="margin-top:20px">
+          <h3>Google'da bizi değerlendirin</h3>
+          <p>Hizmetimizden memnun kaldıysanız Google'da birkaç kelimelik yorumunuz bize çok yardımcı olur.</p>
+          <a class="btn btn-siyah" id="yorum-link" target="_blank" rel="noopener" style="margin-top:12px">★ Yorum Yaz</a>
+        </div>
+      </div>
+      <div class="kart-blok" style="margin:0">
+        <form id="talep-form" novalidate>
+          <div class="form-izgara">
+            <label class="alan"><span>Adınız Soyadınız *</span><input type="text" name="ad" required maxlength="100" autocomplete="name"></label>
+            <label class="alan"><span>Telefon *</span><input type="tel" name="tel" required maxlength="30" autocomplete="tel"></label>
+            <label class="alan"><span>Ne arıyorsunuz?</span><select name="islem"><option>Satılık</option><option>Kiralık</option></select></label>
+            <label class="alan"><span>Mülk Tipi</span><select name="tip"><option>Daire</option><option>Müstakil Ev</option><option>Villa</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option><option>Fark etmez</option></select></label>
+            <label class="alan"><span>İlçe / Mahalle</span><input type="text" name="konum" maxlength="100" placeholder="Örn. Merkez, Fakıuşağı"></label>
+            <label class="alan"><span>Oda Sayısı</span><input type="text" name="oda" maxlength="20" placeholder="Örn. 3+1"></label>
+            <label class="alan tam"><span>En Fazla Bütçe (TL)</span><input type="text" name="fiyat" maxlength="30" inputmode="numeric"></label>
+            <label class="alan tam"><span>Diğer istekleriniz</span><textarea name="not" maxlength="1500" style="min-height:80px" placeholder="Örn. asansörlü, okula yakın, krediye uygun"></textarea></label>
+          </div>
+          <div class="kvkk-yer"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button type="submit" class="btn btn-kirmizi">Talebimi Gönder</button>
+            <button type="button" class="btn btn-wp gizli" data-wp-form="talep-form">WhatsApp ile Gönder</button>
           </div>
           <div class="sonuc" aria-live="polite"></div>
         </form>
@@ -99,9 +135,9 @@
 <footer id="site-alt"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=8"></script>
-<script src="js/common.js?v=8"></script>
-<script src="js/hesap.js?v=8"></script>
-<script src="js/iletisim.js?v=8"></script>
+<script src="js/config.js?v=9"></script>
+<script src="js/common.js?v=9"></script>
+<script src="js/hesap.js?v=9"></script>
+<script src="js/iletisim.js?v=9"></script>
 </body>
 </html>

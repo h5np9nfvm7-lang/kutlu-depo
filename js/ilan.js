@@ -46,6 +46,17 @@
   const donatim = [['Balkon', i.balkon], ['Asansör', i.asansor], ['Otopark', i.otopark], ['Site İçinde', i.site_icinde]];
   const arsaMi = i.kategori === 'Arsa';
 
+ // Video (YouTube ise sayfaya gömülür) ve sanal tur
+  const ytId = (u) => { const m = String(u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/); return m ? m[1] : null; };
+  const guvenliLink = (u) => /^https:\/\//i.test(String(u || '')) ? u : null;
+  const video = guvenliLink(i.video_url), tur = guvenliLink(i.sanal_tur_url), yt = ytId(video);
+  const medyaHtml = (video || tur) ? `<div class="kart-blok"><h2>Video ve Sanal Tur</h2>
+    ${yt ? `<div class="video-kutu"><iframe src="https://www.youtube-nocookie.com/embed/${yt}" title="İlan videosu" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>` : ''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:${yt ? '14px' : '0'}">
+      ${video && !yt ? `<a class="btn btn-siyah" href="${esc(video)}" target="_blank" rel="noopener">▶ Videoyu İzle</a>` : ''}
+      ${tur ? `<a class="btn btn-kirmizi" href="${esc(tur)}" target="_blank" rel="noopener">360° Sanal Turu Başlat</a>` : ''}
+    </div></div>` : '';
+
   const wpMesaj = `Merhaba, ${i.id} numaralı "${i.baslik}" ilanı hakkında bilgi almak istiyorum. ${location.href}`;
   const fav = BE.favoriMi(i.id);
 
@@ -84,6 +95,7 @@
 
       ${i.aciklama ? `<div class="kart-blok"><h2>Açıklama</h2><div class="aciklama-metin">${esc(i.aciklama)}</div></div>` : ''}
 
+      ${medyaHtml}
       ${(i.ozellikler || []).length ? `<div class="kart-blok"><h2>Özellikler</h2><ul class="ozellik-liste">${i.ozellikler.map((o) => `<li>${ikon('tik')} ${esc(o)}</li>`).join('')}</ul></div>` : ''}
 
       ${i.enlem && i.boylam ? `<div class="kart-blok"><h2>Konum</h2>
@@ -115,6 +127,7 @@
             <input type="text" name="ad" placeholder="Adınız Soyadınız" aria-label="Adınız Soyadınız" required maxlength="100">
             <input type="tel" name="tel" placeholder="Telefon numaranız" aria-label="Telefon" required maxlength="30">
             <textarea name="mesaj" rows="3" style="min-height:80px" aria-label="Mesaj" maxlength="1000">${BE.aktifMi(i) ? 'Bu ilan hakkında bilgi almak istiyorum.' : 'Bu ilana benzer bir ilan arıyorum.'}</textarea>
+            ${BE.kvkkOnay()}
             <button type="submit" class="btn btn-siyah btn-blok">Gönder</button>
           </div>
           <div id="ilan-form-sonuc" aria-live="polite"></div>
@@ -178,6 +191,7 @@
     const f = e.target, sonuc = $('#ilan-form-sonuc');
     const ad = f.ad.value.trim(), tel = f.tel.value.trim();
     if (ad.length < 2 || tel.replace(/\D/g, '').length < 10) { sonuc.innerHTML = '<div class="form-mesaj hata">Lütfen adınızı ve geçerli bir telefon numarası yazın.</div>'; return; }
+    if (!BE.kvkkKontrol(f)) { sonuc.innerHTML = '<div class="form-mesaj hata">Lütfen aydınlatma metnini okuduğunuzu onaylayın.</div>'; return; }
     const btn = $('button[type=submit]', f); btn.disabled = true; btn.textContent = 'Gönderiliyor…';
     try {
       const { error } = await BE.db.from('mesajlar').insert({ tur: 'İlan Talebi', ad_soyad: ad, telefon: tel, konu: `#${i.id} ${i.baslik}`.slice(0, 120), mesaj: f.mesaj.value.trim().slice(0, 3000), ilan_id: i.id });

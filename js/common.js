@@ -89,6 +89,14 @@
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
   BE.ilanUrl = (i) => `ilan-${i.id}-${BE.slug(i.baslik)}.html`;
+  // Google yorum bağlantısı (ayar yoksa Google Haritalar'da işletmeyi açar)
+  BE.yorumLink = (a) => a.google_yorum_linki && /^https:\/\//.test(a.google_yorum_linki)
+    ? a.google_yorum_linki
+    : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((a.firma_adi || 'Bizim Emlak') + ' ' + (a.hizmet_bolgesi ? 'Osmaniye' : ''));
+  // KVKK onay kutusu (formlarda)
+  BE.kvkkOnay = () => `<label class="onay kvkk-onay"><input type="checkbox" name="kvkk" required>
+    <span><a href="kvkk.html" target="_blank" rel="noopener">Kişisel verilerin korunması aydınlatma metnini</a> okudum.</span></label>`;
+  BE.kvkkKontrol = (f) => !f.kvkk || f.kvkk.checked;
   BE.konum = (i) => [i.mahalle, i.ilce, i.il].filter(Boolean).join(', ');
   BE.kapak = (i) => (Array.isArray(i.resimler) && i.resimler.length ? i.resimler[0] : '');
   BE.depola = {
@@ -280,6 +288,7 @@
         <img src="images/logo-beyaz.png" alt="${BE.esc(a.firma_adi)}" class="alt-logo">
         <p>${BE.esc(a.slogan)}</p>
         ${sosyal ? `<div class="sosyal">${sosyal}</div>` : ''}
+        <a class="btn btn-kucuk btn-beyaz yorum-btn" href="${BE.esc(BE.yorumLink(a))}" target="_blank" rel="noopener">${BE.ikon('yildiz')} Google'da Değerlendirin</a>
       </div>
       <div>
         <h4>Hızlı Linkler</h4>
@@ -305,10 +314,29 @@
       ${POPULER.map(([u, t]) => `<a href="${u}">${t}</a>`).join('')}
     </div>
     <div class="kap alt-telif">
-      <span>© ${new Date().getFullYear()} ${BE.esc(a.firma_adi)}. Tüm hakları saklıdır.</span>
+      <span>© ${new Date().getFullYear()} ${BE.esc(a.firma_adi)}. Tüm hakları saklıdır. · <a href="kvkk.html">KVKK Aydınlatma Metni</a></span>
       <span>${BE.esc(a.hizmet_bolgesi || '')}</span>
     </div>`;
   }
+
+  /* ---------- Ziyaret istatistiği (çerezsiz; kişisel veri tutulmaz) ---------- */
+  BE.ziyaretKaydet = function () {
+    try {
+      if (!BE.db || BE._ziyaret) return;
+      BE._ziyaret = true;
+      const ua = navigator.userAgent || '';
+      if (navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless/i.test(ua)) return;
+      if (/admin\.html$/.test(location.pathname)) return;
+      let kaynak = null;
+      try { const r = document.referrer ? new URL(document.referrer).hostname : ''; if (r && r !== location.hostname) kaynak = r.replace(/^www\./, '').slice(0, 100); } catch { /* yok */ }
+      const ilan = BE.param('id') || window.BE_ILAN_ID || null;
+      BE.db.from('ziyaretler').insert({
+        sayfa: (location.pathname || '/').slice(0, 200),
+        ilan_id: ilan && /^\d+$/.test(String(ilan)) ? Number(ilan) : null,
+        kaynak, cihaz: /Mobi|Android|iPhone|iPad/i.test(ua) ? 'mobil' : 'masaustu'
+      }).then(() => {}, () => {});
+    } catch { /* istatistik hatası siteyi etkilemesin */ }
+  };
 
   BE.sayfaBaslat = async function (aktif) {
     const a = await BE.ayarlar();
@@ -344,6 +372,7 @@
       t.className = 'tel-sabit'; t.href = BE.telLink(a.telefon); t.setAttribute('aria-label', 'Hemen arayın');
       t.innerHTML = BE.ikon('telefon'); document.body.appendChild(t);
     }
+    BE.ziyaretKaydet();
     // Sayfadaki [data-ayar] alanlarını doldur
     BE.$$('[data-ayar]').forEach((e) => { const v = a[e.dataset.ayar]; if (v !== undefined && v !== '') e.textContent = v; });
     BE.favSayiGuncelle();

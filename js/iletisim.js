@@ -41,12 +41,23 @@
       f.fiyat.value && `Beklenen fiyat: ${f.fiyat.value} TL`, f.not.value && `Not: ${f.not.value}`
     ].filter(Boolean).join('\n')
   });
+  const talepMesaji = (f) => ({
+    tur: 'Ev Talebi', ad_soyad: f.ad.value.trim(), telefon: f.tel.value.trim(),
+    konu: `${f.islem.value} ${f.tip.value} arıyor`,
+    mesaj: [
+      `Aranan: ${f.islem.value} ${f.tip.value}`, f.konum.value && `Konum: ${f.konum.value}`,
+      f.oda.value && `Oda: ${f.oda.value}`, f.fiyat.value && `En fazla bütçe: ${f.fiyat.value} TL`, f.not.value && `Not: ${f.not.value}`
+    ].filter(Boolean).join('\n')
+  });
   const kontrol = (f, gerekMesaj) => {
     if (f.ad.value.trim().length < 2) return 'Lütfen adınızı yazın.';
     if (!telOk(f.tel.value)) return 'Lütfen geçerli bir telefon numarası yazın.';
     if (gerekMesaj && f.mesaj.value.trim().length < 3) return 'Lütfen mesajınızı yazın.';
+    if (!BE.kvkkKontrol(f)) return 'Lütfen aydınlatma metnini okuduğunuzu onaylayın.';
     return '';
   };
+  $$('.kvkk-yer').forEach((e) => { e.innerHTML = BE.kvkkOnay(); });
+  const yl = $('#yorum-link'); if (yl) yl.href = BE.yorumLink(a);
 
   function bagla(formId, olustur, gerekMesaj) {
     const f = $('#' + formId), sonuc = $('.sonuc', f);
@@ -83,6 +94,7 @@
   }
   bagla('iletisim-form', iletisimMesaji, true);
   bagla('mulk-form', mulkMesaji, false);
+  bagla('talep-form', talepMesaji, false);
 
   // Form başka sayfadan çağrıldıysa
   const p = BE.param('konu');

@@ -14,7 +14,8 @@
 <link rel="icon" href="images/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 <header id="site-ust"></header>
@@ -137,9 +138,11 @@
             </select>
             <button type="button" class="gorunum-btn aktif" data-gorunum="izgara" aria-label="Izgara görünümü"><svg class="ikon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
             <button type="button" class="gorunum-btn" data-gorunum="liste" aria-label="Liste görünümü"><svg class="ikon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+            <button type="button" class="gorunum-btn" data-gorunum="harita" aria-label="Harita görünümü" title="Haritada gör"><svg class="ikon" viewBox="0 0 24 24"><path d="m1 6 7-3 8 3 7-3v15l-7 3-8-3-7 3z"/><path d="M8 3v15M16 6v15"/></svg></button>
           </div>
         </div>
         <div class="ilan-izgara" id="sonuclar"></div>
+        <div id="harita-gorunum" class="gizli"><div id="ilan-harita" class="ilan-harita"></div><p id="harita-not" style="font-size:.85rem;color:var(--metin-soluk);margin-top:8px"></p></div>
         <nav class="sayfalama" id="sayfalama" aria-label="Sayfalar"></nav>
       </div>
     </div>
@@ -149,8 +152,8 @@
 <footer id="site-alt"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=8"></script>
-<script src="js/common.js?v=8"></script>
-<script src="js/ilanlar.js?v=8"></script>
+<script src="js/config.js?v=9"></script>
+<script src="js/common.js?v=9"></script>
+<script src="js/ilanlar.js?v=9"></script>
 </body>
 </html>

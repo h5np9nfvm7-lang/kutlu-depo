@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=8">
-<link rel="stylesheet" href="css/admin.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/admin.css?v=9">
 </head>
 <body class="admin">
 
@@ -40,6 +40,7 @@
       <button type="button" data-git="ilanlar"><svg class="ikon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>İlanlar</span></button>
       <button type="button" data-git="yeni" class="yan-yeni"><svg class="ikon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Yeni İlan</span></button>
       <button type="button" data-git="mesajlar"><svg class="ikon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg><span>Mesajlar</span> <b class="okunmamis" id="okunmamis"></b></button>
+      <button type="button" data-git="istatistik"><svg class="ikon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/></svg><span>İstatistikler</span></button>
       <button type="button" data-git="ayarlar"><svg class="ikon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Site Ayarları</span></button>
     </nav>
     <div class="yan-alt">
@@ -97,6 +98,7 @@
             <small>Birden fazla seçebilirsiniz. Fotoğraflar otomatik küçültülür. İlk fotoğraf kapak olur; sürükleyerek veya oklarla sıralayın.</small>
           </label>
           <div id="foto-ilerleme" class="gizli"><div class="ilerleme"><div id="foto-bar"></div></div><small id="foto-durum"></small></div>
+          <label class="anahtar" style="margin-top:14px;max-width:420px"><input type="checkbox" id="filigran" checked><span></span> Yüklenen fotoğraflara Bizim Emlak logosu ekle</label>
           <div class="foto-liste" id="foto-liste"></div>
         </div>
 
@@ -147,6 +149,14 @@
           </div>
         </div>
 
+        <div class="kart-blok"><h2>Video ve Sanal Tur (isteğe bağlı)</h2>
+          <div class="form-izgara">
+            <label class="alan"><span>Video linki (YouTube linki sayfada oynatılır)</span><input type="url" name="video_url" maxlength="500" placeholder="https://www.youtube.com/watch?v=..."></label>
+            <label class="alan"><span>360° sanal tur linki</span><input type="url" name="sanal_tur_url" maxlength="500" placeholder="https://..."></label>
+          </div>
+          <p style="font-size:.85rem;color:var(--metin-soluk);margin:8px 0 0">Link "https://" ile başlamalı. Sahibinden'deki videonuzu YouTube'a yükleyip linkini buraya yapıştırabilirsiniz.</p>
+        </div>
+
         <div class="kart-blok"><h2>5. Açıklama ve Özellikler</h2>
           <label class="alan"><span>Açıklama</span><textarea name="aciklama" rows="7" maxlength="5000" placeholder="İlanı anlatan birkaç cümle yazın…"></textarea></label>
           <div class="alan" style="margin-top:16px"><span>Özellikler (yazıp Enter'a basın veya aşağıdan seçin)</span>
@@ -177,9 +187,24 @@
     <!-- MESAJLAR -->
     <section data-sayfa="mesajlar" class="gizli">
       <div class="sayfa-ust"><h1>Mesajlar</h1>
-        <select id="ms-filtre" style="width:auto" aria-label="Mesaj filtresi"><option value="">Tümü</option><option value="okunmamis">Okunmamış</option><option value="İletişim">İletişim formu</option><option value="Mülk Teklifi">Mülk teklifleri</option><option value="İlan Talebi">İlan talepleri</option></select>
+        <select id="ms-filtre" style="width:auto" aria-label="Mesaj filtresi"><option value="">Tümü</option><option value="okunmamis">Okunmamış</option><option value="İletişim">İletişim formu</option><option value="Mülk Teklifi">Mülk teklifleri</option><option value="İlan Talebi">İlan talepleri</option><option value="Ev Talebi">Ev arayanlar</option></select>
       </div>
       <div id="ms-liste"></div>
+    </section>
+
+    <!-- İSTATİSTİKLER -->
+    <section data-sayfa="istatistik" class="gizli">
+      <div class="sayfa-ust"><h1>İstatistikler</h1>
+        <select id="ist-sure" style="width:auto" aria-label="Süre"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
+      </div>
+      <p style="color:var(--metin-soluk);margin-top:-8px">Ziyaretler çerezsiz ve kişisel bilgi tutulmadan sayılır. Google'da hangi kelimelerle bulunduğunuzu görmek için Google Search Console'u kullanın.</p>
+      <div class="ozet-izgara" id="ist-kutular"></div>
+      <div class="kart-blok" style="margin-top:24px"><h2>Günlük Ziyaretler</h2><div id="ist-grafik" class="ist-grafik"></div></div>
+      <div class="iki-kolon">
+        <div class="kart-blok"><h2>En Çok Bakılan İlanlar</h2><div id="ist-ilanlar"></div></div>
+        <div class="kart-blok"><h2>Ziyaretçiler Nereden Geliyor?</h2><div id="ist-kaynak"></div></div>
+      </div>
+      <div class="kart-blok"><h2>En Çok Ziyaret Edilen Sayfalar</h2><div id="ist-sayfalar"></div></div>
     </section>
 
     <!-- AYARLAR -->
@@ -214,6 +239,7 @@
             <label class="alan tam"><span>Büyük Başlık</span><input type="text" data-a="hero_baslik"></label>
             <label class="alan tam"><span>Başlık Altı Yazı</span><input type="text" data-a="hero_alt"></label>
             <label class="alan"><span>Tecrübe Yılı</span><input type="number" data-a="tecrube_yili" min="0"></label>
+            <label class="alan tam"><span>Google yorum bağlantısı (Google İşletme Profili → "Yorum isteyin" → bağlantıyı kopyala). Boş bırakırsanız Google Haritalar'da işletme araması açılır.</span><input type="url" data-a="google_yorum_linki" placeholder="https://g.page/r/..."></label>
             <label class="alan"><span>Duyuru Bandı (en üstte kırmızı şerit; boş bırakırsanız görünmez)</span><input type="text" data-a="duyuru" placeholder="Örn. Bayram süresince ofisimiz kapalıdır."></label>
           </div>
         </div>
@@ -284,9 +310,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="js/config.js?v=8"></script>
-<script src="js/common.js?v=8"></script>
-<script src="js/hesap.js?v=8"></script>
-<script src="js/admin.js?v=8"></script>
+<script src="js/config.js?v=9"></script>
+<script src="js/common.js?v=9"></script>
+<script src="js/hesap.js?v=9"></script>
+<script src="js/admin.js?v=9"></script>
 </body>
 </html>

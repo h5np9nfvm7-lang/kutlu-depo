@@ -110,6 +110,7 @@
     else if (h === 'ilanlar') { ilanTablosu(); goster('ilanlar'); }
     else if (h === 'mesajlar') { mesajListesi(); goster('mesajlar'); }
     else if (h === 'ayarlar') { ayarFormu(); goster('ayarlar'); }
+    else if (h === 'istatistik') { istatistik(); goster('istatistik'); }
     else { ozet(); goster('ozet'); }
   }
   window.addEventListener('beforeunload', (e) => { if (kirli) { e.preventDefault(); e.returnValue = ''; } });
@@ -257,6 +258,12 @@
     const yollar = urller.map(depoYolu).filter(Boolean);
     if (yollar.length) db.storage.from(BUCKET).remove(yollar).then(({ error }) => error && console.warn('Fotoğraf silinemedi', error));
   }
+  let logoSozu = null;
+  const logoYukle = () => logoSozu || (logoSozu = new Promise((coz, red) => { const im = new Image(); im.onload = () => coz(im); im.onerror = red; im.src = 'images/logo.png'; }));
+  // Logo ekleme tercihini hatırla
+  try { const f = localStorage.getItem('be_filigran'); if (f === '0') document.getElementById('filigran').checked = false; } catch { /* yok */ }
+  document.getElementById('filigran').addEventListener('change', (e) => { try { localStorage.setItem('be_filigran', e.target.checked ? '1' : '0'); } catch { /* yok */ } });
+
   async function kucult(dosya) {
     const EN = 1600;
     let kaynak;
@@ -267,6 +274,18 @@
     const w = kaynak.width, h = kaynak.height, o = Math.min(1, EN / Math.max(w, h));
     const c = document.createElement('canvas'); c.width = Math.round(w * o); c.height = Math.round(h * o);
     const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(kaynak, 0, 0, c.width, c.height);
+    if ($('#filigran').checked) {
+      try {
+        const logo = await logoYukle();
+        const lw = Math.round(c.width * 0.22), lh = Math.round(lw * logo.height / logo.width), pay = Math.round(c.width * 0.025);
+        x.globalAlpha = 0.85;
+        x.fillStyle = 'rgba(255,255,255,0.75)';
+        const r = Math.round(lh * 0.12);
+        x.beginPath(); x.roundRect ? x.roundRect(c.width - lw - pay * 1.6, c.height - lh - pay * 1.6, lw + pay * 1.2, lh + pay * 1.2, r) : x.rect(c.width - lw - pay * 1.6, c.height - lh - pay * 1.6, lw + pay * 1.2, lh + pay * 1.2); x.fill();
+        x.globalAlpha = 1;
+        x.drawImage(logo, c.width - lw - pay, c.height - lh - pay, lw, lh);
+      } catch (e) { console.warn('Logo eklenemedi', e); }
+    }
     let blob = await new Promise((coz) => c.toBlob(coz, 'image/webp', 0.82));
     if (!blob || blob.type !== 'image/webp') blob = await new Promise((coz) => c.toBlob(coz, 'image/jpeg', 0.85));
     return blob;
@@ -420,6 +439,8 @@
     TAMSAYI.forEach((n) => { form[n].value = i && i[n] != null ? i[n] : ''; });
     PARA.forEach((n) => { form[n].value = i && i[n] != null ? BE.sayi(i[n]) : ''; });
     BAYRAK.forEach((n) => { form[n].checked = i ? !!i[n] : n === 'yayinda'; });
+    form.video_url.value = (i && i.video_url) || '';
+    form.sanal_tur_url.value = (i && i.sanal_tur_url) || '';
     form.enlem.value = i && i.enlem != null ? i.enlem : '';
     form.boylam.value = i && i.boylam != null ? i.boylam : '';
     fotolar = i ? [...(i.resimler || [])] : [];
@@ -442,10 +463,12 @@
     v.enlem = isNaN(la) ? null : la; v.boylam = isNaN(lo) ? null : lo;
     v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire'; v.durum = v.durum || 'Aktif';
     v.resimler = fotolar; v.ozellikler = etiketler;
+    ['video_url', 'sanal_tur_url'].forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
 
     const hatalar = [];
     if (!v.baslik || v.baslik.length < 3) hatalar.push('başlık');
     if (v.fiyat === null) hatalar.push('fiyat');
+    if ((v.video_url && !/^https:\/\//i.test(v.video_url)) || (v.sanal_tur_url && !/^https:\/\//i.test(v.sanal_tur_url))) hatalar.push('video/sanal tur linki "https://" ile başlamalı');
     if (hatalar.length) {
       $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Lütfen doldurun: ${hatalar.join(', ')}</span>`;
       (v.baslik ? form.fiyat : form.baslik).focus(); return;
@@ -516,6 +539,68 @@
       $('#okunmamis').textContent = mesajlar.filter((x) => !x.okundu).length || ''; mesajListesi(); BE.bildirim('Mesaj silindi');
     }
   });
+
+  /* ---------- İstatistikler ---------- */
+  $('#ist-sure').addEventListener('change', istatistik);
+  async function istatistik() {
+    const gun = Number($('#ist-sure').value);
+    $('#ist-kutular').innerHTML = '<p>Yükleniyor…</p>';
+    db.rpc('eski_ziyaretleri_temizle').then(() => {}, () => {});
+    const bas = new Date(); bas.setHours(0, 0, 0, 0); bas.setDate(bas.getDate() - (gun - 1));
+    let tum = [], from = 0;
+    while (true) {
+      const { data, error } = await db.from('ziyaretler').select('created_at,sayfa,ilan_id,kaynak,cihaz').gte('created_at', bas.toISOString()).order('created_at').range(from, from + 999);
+      if (error) { $('#ist-kutular').innerHTML = `<p style="color:var(--kirmizi)">${esc(hataMetni(error))}</p>`; return; }
+      tum = tum.concat(data || []);
+      if (!data || data.length < 1000 || tum.length >= 50000) break;
+      from += 1000;
+    }
+    const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
+    const gunAnahtar = (d) => { const t = new Date(d); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; };
+    const bugunSay = tum.filter((z) => new Date(z.created_at) >= bugun).length;
+    const mobil = tum.filter((z) => z.cihaz === 'mobil').length;
+    const ilanBakis = tum.filter((z) => z.ilan_id).length;
+    const kutu = (s, y) => `<div class="ozet-kutu" style="cursor:default"><strong>${BE.sayi(s)}</strong>${y}</div>`;
+    $('#ist-kutular').innerHTML = kutu(bugunSay, 'Bugün') + kutu(tum.length, `Son ${gun} gün`) + kutu(ilanBakis, 'İlan görüntüleme')
+      + kutu(tum.length ? Math.round(mobil / tum.length * 100) : 0, '% Mobil');
+    // günlük grafik
+    const sayac = {}; tum.forEach((z) => { const k = gunAnahtar(z.created_at); sayac[k] = (sayac[k] || 0) + 1; });
+    const gunler = []; for (let n = 0; n < gun; n++) { const d = new Date(bas); d.setDate(bas.getDate() + n); gunler.push(d); }
+    const enCok = Math.max(1, ...gunler.map((d) => sayac[gunAnahtar(d)] || 0));
+    $('#ist-grafik').innerHTML = gunler.map((d) => { const v = sayac[gunAnahtar(d)] || 0; return `<div class="cubuk" style="height:${v / enCok * 100}%"><span>${d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}: ${v}</span></div>`; }).join('')
+      + '';
+    $('#ist-grafik').insertAdjacentHTML('afterend', '');
+    const eksen = $('#ist-grafik').nextElementSibling;
+    if (!eksen || !eksen.classList.contains('ist-eksen')) $('#ist-grafik').insertAdjacentHTML('afterend', '<div class="ist-eksen"></div>');
+    $('#ist-grafik').nextElementSibling.innerHTML = `<span>${gunler[0].toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span><span>Bugün</span>`;
+    // listeler
+    const say = (dizi) => { const m = new Map(); dizi.forEach((k) => m.set(k, (m.get(k) || 0) + 1)); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
+    const liste = (veri, etiket) => {
+      if (!veri.length) return '<p style="color:var(--metin-soluk)">Henüz veri yok.</p>';
+      const ust = veri[0][1];
+      return veri.slice(0, 10).map(([k, v]) => `<div class="ist-satir"><div>${etiket(k)}<div class="ist-bar"><div style="width:${v / ust * 100}%"></div></div></div><strong>${BE.sayi(v)}</strong></div>`).join('');
+    };
+    $('#ist-ilanlar').innerHTML = liste(say(tum.filter((z) => z.ilan_id).map((z) => z.ilan_id)), (id) => {
+      const i = ilanlar.find((x) => x.id === id); return i ? `<a href="#duzenle-${id}">#${id} ${esc(i.baslik)}</a>` : `#${id} (silinmiş ilan)`;
+    });
+    const KAYNAK_AD = (k) => {
+      if (!k) return 'Doğrudan (link/yer imi/WhatsApp)';
+      if (/google\./.test(k)) return 'Google';
+      if (/instagram/.test(k)) return 'Instagram';
+      if (/facebook|fb\./.test(k)) return 'Facebook';
+      if (/sahibinden/.test(k)) return 'Sahibinden';
+      if (/bing|yandex|yahoo/.test(k)) return 'Diğer arama motorları';
+      return k;
+    };
+    $('#ist-kaynak').innerHTML = liste(say(tum.map((z) => KAYNAK_AD(z.kaynak))), (k) => esc(k));
+    const SAYFA_AD = (p) => {
+      if (p === '/' || /index\.html$/.test(p)) return 'Ana sayfa';
+      const ad = p.replace(/^\//, '').replace(/\.html$/, '');
+      return ({ ilanlar: 'İlanlar', iletisim: 'İletişim', hakkimizda: 'Hakkımızda', rehber: 'Emlak Rehberi', favoriler: 'Favoriler', ilan: 'İlan detayı', kvkk: 'KVKK' })[ad]
+        || (/^ilan-\d+/.test(ad) ? 'İlan detayı' : ad.replace(/-/g, ' '));
+    };
+    $('#ist-sayfalar').innerHTML = liste(say(tum.map((z) => SAYFA_AD(z.sayfa))), (k) => esc(k));
+  }
 
   /* ---------- Site ayarları ---------- */
   const af = $('#ayar-form');

@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=8';
+const SURUM = 'v=9';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -197,6 +197,8 @@ function ilanSayfasi(i, ayar) {
       <div class="kart-blok"><h2>İlan Bilgileri</h2><dl class="bilgi-tablo">${satir.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></div>
       ${i.aciklama ? `<div class="kart-blok"><h2>Açıklama</h2><div class="aciklama-metin">${esc(i.aciklama)}</div></div>` : ''}
       ${(i.ozellikler || []).length ? `<div class="kart-blok"><h2>Özellikler</h2><ul class="ozellik-liste">${i.ozellikler.map((o) => `<li>${esc(o)}</li>`).join('')}</ul></div>` : ''}
+      ${/^https:\/\//.test(i.video_url || '') ? `<p><a href="${esc(i.video_url)}" target="_blank" rel="noopener">İlan videosunu izleyin</a></p>` : ''}
+      ${/^https:\/\//.test(i.sanal_tur_url || '') ? `<p><a href="${esc(i.sanal_tur_url)}" target="_blank" rel="noopener">360° sanal tur</a></p>` : ''}
       <p>Bilgi ve gösterim için: <a href="tel:${esc(String(ayar.telefon || '').replace(/[^\d+]/g, '').replace(/^0/, '+90'))}">${esc(ayar.telefon || '')}</a></p>
     </div>
   </section>
@@ -244,7 +246,7 @@ function aramaSayfasi(s, ilanlar, tumSayfalar) {
     <div class="kap">
       <div class="seo-metin"><p>${esc(s.giris)}</p></div>
       <div class="ust-satir" style="margin-top:24px"><h2>Güncel İlanlar (${l.length})</h2><a class="btn btn-kirmizi" href="${filtre}">Filtreleyerek Ara</a></div>
-      <div class="ilan-izgara">${l.length ? l.map(kart).join('') : `<div class="bos-durum" style="grid-column:1/-1"><h3>Bu kategoride şu an ilan yok</h3><p>Aradığınız evi sizin için bulalım.</p><a class="btn btn-kirmizi" href="iletisim.html">Bize Ulaşın</a></div>`}</div>
+      <div class="ilan-izgara">${l.length ? l.map(kart).join('') : `<div class="bos-durum" style="grid-column:1/-1"><h3>Bu kategoride şu an ilan yok</h3><p>Aradığınız evi sizin için bulalım.</p><a class="btn btn-kirmizi" href="iletisim.html#ev-talebi">Aradığım Evi Bildir</a></div>`}</div>
     </div>
   </section>
   <section class="bolum bolum-gri">
@@ -258,7 +260,7 @@ function aramaSayfasi(s, ilanlar, tumSayfalar) {
   <section class="bolum">
     <div class="kap"><div class="cagri">
       <div><h2>Aradığınızı bulamadınız mı?</h2><p>Bize ne aradığınızı söyleyin, uygun ilanları size ulaştıralım.</p></div>
-      <div class="butonlar"><a class="btn btn-kirmizi" href="iletisim.html">Bize Ulaşın</a></div>
+      <div class="butonlar"><a class="btn btn-kirmizi" href="iletisim.html#ev-talebi">Aradığım Evi Bildir</a></div>
     </div></div>
   </section>
 </main>` + SON('<script>BE.sayfaBaslat("ilanlar.html");</script>');
@@ -285,7 +287,7 @@ export async function calistir(veri) {
   for (const s of SAYFALAR) writeFileSync(join(KOK, `${s.dosya}.html`), aramaSayfasi(s, ilanlar, SAYFALAR));
 
   const sabit = [['', '1.0', 'daily'], ['ilanlar.html', '0.9', 'daily'], ...SAYFALAR.map((s) => [`${s.dosya}.html`, '0.9', 'daily']),
-    ['iletisim.html', '0.7', 'monthly'], ['hakkimizda.html', '0.6', 'monthly'], ['rehber.html', '0.6', 'monthly']];
+    ['iletisim.html', '0.7', 'monthly'], ['hakkimizda.html', '0.6', 'monthly'], ['rehber.html', '0.6', 'monthly'], ['kvkk.html', '0.2', 'yearly']];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sabit.map(([u, p, c]) => `  <url><loc>${SITE}/${u}</loc><lastmod>${bugun}</lastmod><changefreq>${c}</changefreq><priority>${p}</priority></url>`).join('\n')}

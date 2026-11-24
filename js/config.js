@@ -64,5 +64,6 @@ window.BE_VARSAYILAN_AYARLAR = {
   sosyal: { facebook: '', instagram: '', youtube: '', tiktok: '' },
   tapu_alici_orani: 2,
   tapu_satici_orani: 2,
-  duyuru: ''
+  duyuru: '',
+  google_yorum_linki: '' // Google İşletme Profili > "Yorum isteyin" bağlantısı; boşsa Google Haritalar araması açılır
 };

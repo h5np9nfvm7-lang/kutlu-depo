@@ -133,11 +133,19 @@
 
     sonucEl.classList.toggle('liste', durum.gorunum === 'liste');
     $$('.gorunum-btn').forEach((b) => b.classList.toggle('aktif', b.dataset.gorunum === durum.gorunum));
+    const haritaModu = durum.gorunum === 'harita';
+    sonucEl.classList.toggle('gizli', haritaModu);
+    $('#sayfalama').classList.toggle('gizli', haritaModu);
+    $('#harita-gorunum').classList.toggle('gizli', !haritaModu);
+    if (haritaModu) haritaCiz(liste);
     sonucEl.innerHTML = parca.length ? parca.map(BE.kart).join('') : `
       <div class="bos-durum" style="grid-column:1/-1">${BE.ikon('ara')}
         <h3>Aramanıza uygun ilan bulunamadı</h3>
-        <p>Filtreleri azaltmayı deneyin veya bize ulaşın, sizin için arayalım.</p>
-        <button class="btn btn-kirmizi" type="button" onclick="document.getElementById('f-temizle').click()">Filtreleri Temizle</button>
+        <p>Filtreleri azaltmayı deneyin ya da aradığınız evi bize bildirin, uygun ilan gelince sizi arayalım.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-cizgi" type="button" onclick="document.getElementById('f-temizle').click()">Filtreleri Temizle</button>
+          <a class="btn btn-kirmizi" href="iletisim.html#ev-talebi">Aradığım Evi Bildir</a>
+        </div>
       </div>`;
 
     // Sayfalama
@@ -157,6 +165,35 @@
       }));
     }
     BE.belirt();
+  }
+
+  /* ---------- Harita görünümü (Leaflet, gerektiğinde yüklenir) ---------- */
+  let harita = null, katman = null, leafletSozu = null;
+  const leafletYukle = () => leafletSozu || (leafletSozu = new Promise((coz, red) => {
+    if (window.L) return coz();
+    const sc = document.createElement('script'); sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    sc.onload = coz; sc.onerror = red; document.head.appendChild(sc);
+  }));
+  async function haritaCiz(liste) {
+    try { await leafletYukle(); } catch { $('#ilan-harita').innerHTML = '<p style="padding:20px">Harita yüklenemedi.</p>'; return; }
+    if (!harita) {
+      harita = L.map('ilan-harita').setView([37.0742, 36.2472], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(harita);
+    }
+    setTimeout(() => harita.invalidateSize(), 50);
+    if (katman) katman.remove();
+    katman = L.featureGroup().addTo(harita);
+    const konumlu = liste.filter((i) => i.enlem && i.boylam);
+    konumlu.forEach((i) => {
+      const ikon = L.divIcon({ className: '', html: `<div style="background:${i.tip === 'Kiralık' ? '#111' : '#D7141A'};color:#fff;font:700 12px Montserrat,sans-serif;padding:4px 8px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3)">${esc(BE.sayi(i.fiyat ? (i.fiyat >= 1e6 ? Math.round(i.fiyat / 1e5) / 10 : Math.round(i.fiyat / 1e3)) : '?'))}${i.fiyat >= 1e6 ? ' Mn' : ' Bin'}</div>`, iconSize: null });
+      L.marker([i.enlem, i.boylam], { icon: ikon }).addTo(katman).bindPopup(
+        `<div class="harita-popup">${BE.kapak(i) ? `<img src="${esc(BE.kapak(i))}" alt="" style="width:200px;border-radius:6px;margin-bottom:6px">` : ''}
+         <strong>${esc(i.baslik)}</strong><div class="fiyat">${BE.fiyat(i)}</div><div>${esc(BE.konum(i))}</div>
+         <a href="${BE.ilanUrl(i)}" style="color:#D7141A;font-weight:700">İlanı Gör →</a></div>`);
+    });
+    if (konumlu.length) harita.fitBounds(katman.getBounds().pad(0.2), { maxZoom: 15 });
+    const eksik = liste.length - konumlu.length;
+    $('#harita-not').textContent = `${konumlu.length} ilan haritada gösteriliyor.${eksik ? ` ${eksik} ilanın konumu girilmemiş.` : ''} Konumlar yaklaşık olarak gösterilmektedir.`;
   }
 
   formuDoldur();

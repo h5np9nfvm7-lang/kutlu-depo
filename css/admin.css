@@ -131,3 +131,14 @@ body.admin { background: var(--gri-acik); }
 .kaldir-secenekler button span { color: var(--metin-soluk); font-size: .9rem; }
 .kaldir-secenekler button.tehlike strong { color: var(--kirmizi); }
 .kaldir-secenekler button.tehlike:hover { border-color: var(--kirmizi); background: var(--kirmizi-acik); }
+
+.ist-grafik { display: flex; align-items: flex-end; gap: 3px; height: 180px; padding-top: 10px; }
+.ist-grafik .cubuk { flex: 1; background: var(--kirmizi); border-radius: 3px 3px 0 0; min-height: 2px; position: relative; }
+.ist-grafik .cubuk:hover { background: var(--siyah); }
+.ist-grafik .cubuk span { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: .7rem; display: none; background: var(--siyah); color: #fff; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.ist-grafik .cubuk:hover span { display: block; }
+.ist-eksen { display: flex; justify-content: space-between; font-size: .75rem; color: var(--metin-soluk); margin-top: 6px; }
+.ist-satir { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gri-acik); align-items: center; }
+.ist-satir:last-child { border: 0; }
+.ist-bar { height: 6px; background: var(--gri-acik); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.ist-bar div { height: 100%; background: var(--kirmizi); }
