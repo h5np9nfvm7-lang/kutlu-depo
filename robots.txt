@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /favoriler.html
+
+Sitemap: https://bizimemlak.biz/sitemap.xml
