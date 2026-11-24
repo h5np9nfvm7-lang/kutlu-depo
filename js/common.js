@@ -352,7 +352,7 @@
       ac.addEventListener('click', () => {
         menu.classList.add('acik'); ac.setAttribute('aria-expanded', 'true');
         perde = document.createElement('div'); perde.className = 'menu-perde'; perde.addEventListener('click', kapat);
-        document.body.appendChild(perde); document.body.style.overflow = 'hidden';
+        ust.appendChild(perde); document.body.style.overflow = 'hidden';
       });
       BE.$('.menu-kapat', ust).addEventListener('click', kapat);
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') kapat(); });
