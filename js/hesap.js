@@ -1,4 +1,4 @@
-/* Hesaplama formülleri (ilan detayı ve hesaplamalar sayfası kullanır) */
+/* Sayı biçimlendirme yardımcıları (panel ve formlar kullanır) */
 window.BE_HESAP = {
   // Aylık eşit taksitli kredi
   kredi(anapara, aylikFaizYuzde, vadeAy) {

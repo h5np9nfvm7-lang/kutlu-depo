@@ -237,7 +237,7 @@
 
   /* ---------- Menü ve alt bilgi ---------- */
   const MENU = [
-    ['index.html', 'Ana Sayfa'], ['ilanlar.html', 'İlanlar'], ['hesaplamalar.html', 'Hesaplamalar'],
+    ['index.html', 'Ana Sayfa'], ['ilanlar.html', 'İlanlar'],
     ['rehber.html', 'Emlak Rehberi'], ['hakkimizda.html', 'Hakkımızda'], ['iletisim.html', 'İletişim']
   ];
 

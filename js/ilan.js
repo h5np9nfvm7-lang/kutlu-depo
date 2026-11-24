@@ -1,7 +1,6 @@
 /* İlan detay sayfası */
 (async function () {
   const { $, $$, esc, ikon } = BE;
-  const H = window.BE_HESAP;
   const alan = $('#ilan-alan');
   const id = BE.param('id') || (window.BE_ILAN_ID ? String(window.BE_ILAN_ID) : null);
   const a = await BE.sayfaBaslat('ilanlar.html');

@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=7';
+const SURUM = 'v=8';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -285,7 +285,7 @@ export async function calistir(veri) {
   for (const s of SAYFALAR) writeFileSync(join(KOK, `${s.dosya}.html`), aramaSayfasi(s, ilanlar, SAYFALAR));
 
   const sabit = [['', '1.0', 'daily'], ['ilanlar.html', '0.9', 'daily'], ...SAYFALAR.map((s) => [`${s.dosya}.html`, '0.9', 'daily']),
-    ['iletisim.html', '0.7', 'monthly'], ['hakkimizda.html', '0.6', 'monthly'], ['hesaplamalar.html', '0.5', 'monthly'], ['rehber.html', '0.6', 'monthly']];
+    ['iletisim.html', '0.7', 'monthly'], ['hakkimizda.html', '0.6', 'monthly'], ['rehber.html', '0.6', 'monthly']];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sabit.map(([u, p, c]) => `  <url><loc>${SITE}/${u}</loc><lastmod>${bugun}</lastmod><changefreq>${c}</changefreq><priority>${p}</priority></url>`).join('\n')}
