@@ -130,17 +130,53 @@
 
   /* ---------- Özet ---------- */
   function ozet() {
-    const yayinda = ilanlar.filter((i) => i.yayinda);
+    const yayinda = ilanlar.filter((i) => i.yayinda && BE.aktifMi(i));
     const kutu = (s, y, hedef, vurgu) => `<button type="button" class="ozet-kutu ${vurgu ? 'vurgu' : ''}" data-git="${hedef}"><strong>${s}</strong>${y}</button>`;
     $('#ozet-kutular').innerHTML =
       kutu(yayinda.length, 'Yayındaki İlan', 'ilanlar') +
       kutu(yayinda.filter((i) => i.tip === 'Satılık').length, 'Satılık', 'ilanlar') +
       kutu(yayinda.filter((i) => i.tip === 'Kiralık').length, 'Kiralık', 'ilanlar') +
-      kutu(ilanlar.length - yayinda.length, 'Yayında Olmayan', 'ilanlar') +
+      kutu(ilanlar.filter((i) => !BE.aktifMi(i)).length, 'Satılan / Pasif', 'ilanlar') +
+      kutu(ilanlar.filter((i) => !i.yayinda).length, 'Gizli', 'ilanlar') +
       kutu(mesajlar.filter((m) => !m.okundu).length, 'Okunmamış Mesaj', 'mesajlar', mesajlar.some((m) => !m.okundu));
     const pop = [...ilanlar].sort((a, b) => (b.goruntulenme || 0) - (a.goruntulenme || 0)).slice(0, 6);
     $('#ozet-populer').innerHTML = pop.length ? pop.map((i) => `<div class="mini-satir"><a href="#duzenle-${i.id}">#${i.id} ${esc(i.baslik)}</a><span style="white-space:nowrap">${ikon('goz')} ${BE.sayi(i.goruntulenme || 0)}</span></div>`).join('') : '<p>Henüz ilan yok.</p>';
     $('#ozet-mesajlar').innerHTML = mesajlar.length ? mesajlar.slice(0, 5).map((m) => `<div class="mini-satir"><span>${m.okundu ? '' : '<b style="color:var(--kirmizi)">● </b>'}<strong>${esc(m.ad_soyad)}</strong> — ${esc(m.konu || m.tur)}</span><small style="white-space:nowrap">${BE.tarih(m.created_at)}</small></div>`).join('') + '<p style="margin:12px 0 0"><a href="#mesajlar" style="color:var(--kirmizi);font-weight:700">Tüm mesajlar →</a></p>' : '<p>Henüz mesaj yok.</p>';
+  }
+
+  /* ---------- İlan durumu (Satıldı / Kiralandı / Pasif) ---------- */
+  const SURE_GUN = 30;
+  const kalanGun = (i) => {
+    if (BE.aktifMi(i) || !i.durum_tarihi) return null;
+    return Math.max(0, SURE_GUN - Math.floor((Date.now() - new Date(i.durum_tarihi)) / 86400000));
+  };
+  const durumEtiketi = (i) => {
+    if (BE.aktifMi(i)) return '';
+    const g = kalanGun(i);
+    return `<span class="durum-btn durum-pasif" title="Sitede bilgi notuyla görünür, listelerde görünmez">${esc(i.durum)} · ${g > 0 ? `${g} gün sonra gizlenecek` : 'süresi doldu, sitede görünmüyor'}</span>`;
+  };
+  function kaldirSec(i) {
+    return new Promise((coz) => {
+      const m = $('#kaldir-modal');
+      $('#kaldir-baslik').textContent = `"${i.baslik}" ilanını kaldır`;
+      $('#kaldir-satildi').textContent = i.tip === 'Kiralık' ? 'Kiralandı' : 'Satıldı';
+      $('#kaldir-satildi-aciklama').textContent = i.tip === 'Kiralık'
+        ? `İlan sayfası ${SURE_GUN} gün boyunca "Bu ilan kiralanmıştır" notuyla görünür, sonra kendiliğinden gizlenir.`
+        : `İlan sayfası ${SURE_GUN} gün boyunca "Bu ilan satılmıştır" notuyla görünür, sonra kendiliğinden gizlenir.`;
+      m.classList.remove('gizli'); $('#kaldir-vazgec').focus();
+      const bitir = (secim) => { m.classList.add('gizli'); m.onclick = null; document.removeEventListener('keydown', tus); coz(secim); };
+      const tus = (e) => { if (e.key === 'Escape') bitir(null); };
+      document.addEventListener('keydown', tus);
+      m.onclick = (e) => {
+        const b = e.target.closest('[data-kaldir]');
+        if (b) bitir(b.dataset.kaldir); else if (e.target === m) bitir(null);
+      };
+    });
+  }
+  async function durumYap(i, durum) {
+    const { data, error } = await db.from('ilanlar').update({ durum }).eq('id', i.id).select().single();
+    if (error) { BE.bildirim(hataMetni(error), 'hata'); return false; }
+    Object.assign(i, data); return true;
   }
 
   /* ---------- İlan tablosu ---------- */
@@ -153,21 +189,26 @@
       if (d === 'kapali' && i.yayinda) return false;
       if ((d === 'Satılık' || d === 'Kiralık') && i.tip !== d) return false;
       if (d === 'one' && !i.one_cikan) return false;
+      if (d === 'aktif' && !(i.yayinda && BE.aktifMi(i))) return false;
+      if (d === 'pasif' && BE.aktifMi(i)) return false;
       if (q && !`${i.id} ${i.baslik} ${i.ilce} ${i.mahalle} ${i.kategori}`.toLocaleLowerCase('tr-TR').includes(q)) return false;
       return true;
     });
     $('#il-tablo').innerHTML = `<thead><tr><th></th><th>İlan</th><th>Fiyat</th><th>Durum</th><th style="text-align:right">İşlemler</th></tr></thead><tbody>` +
-      (l.length ? l.map((i) => `<tr class="${i.yayinda ? '' : 'kapali'}">
+      (l.length ? l.map((i) => `<tr class="${i.yayinda && BE.aktifMi(i) ? '' : 'kapali'}">
         <td>${BE.kapak(i) ? `<img class="kucuk-resim" src="${esc(BE.kapak(i))}" alt="" loading="lazy">` : '<div class="kucuk-resim"></div>'}</td>
         <td><strong>#${i.id} ${esc(i.baslik)}</strong><br><small>${esc(i.tip)} · ${esc(i.kategori)} · ${esc(BE.konum(i))} · ${ikon('goz')} ${i.goruntulenme || 0}</small></td>
         <td style="white-space:nowrap"><strong>${BE.fiyat(i)}</strong></td>
         <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
           <button type="button" class="durum-btn ${i.yayinda ? 'acik' : ''}" data-degistir="yayinda" data-id="${i.id}">${i.yayinda ? '● Yayında' : '○ Yayında değil'}</button>
-          <button type="button" class="durum-btn ${i.one_cikan ? 'one' : ''}" data-degistir="one_cikan" data-id="${i.id}">${i.one_cikan ? '★ Öne çıkan' : '☆ Öne çıkar'}</button></div></td>
+          <button type="button" class="durum-btn ${i.one_cikan ? 'one' : ''}" data-degistir="one_cikan" data-id="${i.id}">${i.one_cikan ? '★ Öne çıkan' : '☆ Öne çıkar'}</button>
+          ${durumEtiketi(i)}</div></td>
         <td class="islemler-td"><div class="islemler">
           <a class="btn btn-siyah btn-kucuk" href="#duzenle-${i.id}">Düzenle</a>
           <a class="btn btn-cizgi btn-kucuk" href="ilan.html?id=${i.id}" target="_blank" ${i.yayinda ? '' : 'style="display:none"'}>Gör</a>
-          <button type="button" class="btn btn-cizgi btn-kucuk" data-sil="${i.id}" style="color:var(--kirmizi);border-color:var(--kirmizi)">Sil</button></div></td>
+          ${BE.aktifMi(i) ? `<button type="button" class="btn btn-cizgi btn-kucuk" data-kaldir-ac="${i.id}" style="color:var(--kirmizi);border-color:var(--kirmizi)">Kaldır</button>`
+            : `<button type="button" class="btn btn-cizgi btn-kucuk" data-aktif-et="${i.id}">Tekrar Aktif Et</button>
+               <button type="button" class="btn btn-cizgi btn-kucuk" data-sil="${i.id}" style="color:var(--kirmizi);border-color:var(--kirmizi)">Sil</button>`}</div></td>
       </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;padding:40px">${ilanlar.length ? 'Aramanıza uygun ilan yok.' : 'Henüz ilan eklemediniz. <a href="#yeni" style="color:var(--kirmizi);font-weight:700">İlk ilanınızı ekleyin →</a>'}</td></tr>`) + '</tbody>';
   }
   $('#il-tablo').addEventListener('click', async (e) => {
@@ -181,16 +222,34 @@
       BE.bildirim(alan === 'yayinda' ? (i.yayinda ? 'İlan yayına alındı' : 'İlan yayından kaldırıldı') : (i.one_cikan ? 'Öne çıkarıldı' : 'Öne çıkarma kaldırıldı'));
       return;
     }
+    const k = e.target.closest('[data-kaldir-ac]');
+    if (k) {
+      const i = ilanlar.find((x) => String(x.id) === k.dataset.kaldirAc);
+      const secim = await kaldirSec(i);
+      if (!secim) return;
+      if (secim === 'sil') { await ilanSil(i); return; }
+      const durum = secim === 'satildi' ? (i.tip === 'Kiralık' ? 'Kiralandı' : 'Satıldı') : 'Pasif';
+      if (await durumYap(i, durum)) { ilanTablosu(); BE.bildirim(`İlan "${durum}" olarak işaretlendi. ${SURE_GUN} gün sonra sitede kendiliğinden gizlenecek.`); }
+      return;
+    }
+    const a = e.target.closest('[data-aktif-et]');
+    if (a) {
+      const i = ilanlar.find((x) => String(x.id) === a.dataset.aktifEt);
+      if (await durumYap(i, 'Aktif')) { ilanTablosu(); BE.bildirim('İlan tekrar aktif edildi'); }
+      return;
+    }
     const s = e.target.closest('[data-sil]');
-    if (s) {
-      const i = ilanlar.find((x) => String(x.id) === s.dataset.sil);
-      if (!(await onayla('İlan silinsin mi?', `"${i.baslik}" ilanı ve fotoğrafları kalıcı olarak silinecek. Sadece gizlemek isterseniz "Yayında" düğmesine tıklayın.`, 'Evet, Sil'))) return;
+    if (s) await ilanSil(ilanlar.find((x) => String(x.id) === s.dataset.sil));
+  });
+  async function ilanSil(i) {
+    {
+      if (!(await onayla('İlan silinsin mi?', `"${i.baslik}" ilanı ve fotoğrafları kalıcı olarak silinecek ve geri alınamaz.`, 'Evet, Sil'))) return;
       const { error } = await db.from('ilanlar').delete().eq('id', i.id);
       if (error) { BE.bildirim(hataMetni(error), 'hata'); return; }
       fotoSil(i.resimler || []);
       ilanlar = ilanlar.filter((x) => x.id !== i.id); ilanTablosu(); BE.bildirim('İlan silindi');
     }
-  });
+  }
 
   /* ---------- Fotoğraflar ---------- */
   const depoYolu = (url) => { const k = `/object/public/${BUCKET}/`; const n = url.indexOf(k); return n >= 0 ? decodeURIComponent(url.slice(n + k.length)) : null; };
@@ -340,7 +399,7 @@
 
   /* ---------- İlan formu ---------- */
   const form = $('#ilan-form');
-  const METIN = ['baslik', 'kategori', 'il', 'ilce', 'mahalle', 'oda_sayisi', 'bulundugu_kat', 'isitma', 'tapu_durumu', 'imar_durumu', 'aciklama'];
+  const METIN = ['durum', 'baslik', 'kategori', 'il', 'ilce', 'mahalle', 'oda_sayisi', 'bulundugu_kat', 'isitma', 'tapu_durumu', 'imar_durumu', 'aciklama'];
   const TAMSAYI = ['brut_m2', 'net_m2', 'banyo_sayisi', 'bina_yasi', 'kat_sayisi'];
   const PARA = ['fiyat', 'aidat'];
   const BAYRAK = ['esyali', 'balkon', 'asansor', 'otopark', 'site_icinde', 'krediye_uygun', 'takas', 'yayinda', 'one_cikan'];
@@ -357,7 +416,7 @@
     $('#form-baslik').textContent = i ? `İlanı Düzenle #${i.id}` : 'Yeni İlan';
     const on = $('#form-onizle'); on.classList.toggle('gizli', !(i && i.yayinda)); if (i) on.href = `ilan.html?id=${i.id}`;
     tipAyarla(i ? i.tip : 'Satılık');
-    METIN.forEach((n) => { form[n].value = i ? (i[n] ?? '') : (n === 'il' ? 'Osmaniye' : n === 'kategori' ? 'Daire' : ''); });
+    METIN.forEach((n) => { form[n].value = i ? (i[n] ?? '') : (n === 'il' ? 'Osmaniye' : n === 'kategori' ? 'Daire' : n === 'durum' ? 'Aktif' : ''); });
     TAMSAYI.forEach((n) => { form[n].value = i && i[n] != null ? i[n] : ''; });
     PARA.forEach((n) => { form[n].value = i && i[n] != null ? BE.sayi(i[n]) : ''; });
     BAYRAK.forEach((n) => { form[n].checked = i ? !!i[n] : n === 'yayinda'; });
@@ -381,7 +440,7 @@
     BAYRAK.forEach((n) => { v[n] = form[n].checked; });
     const la = parseFloat(String(form.enlem.value).replace(',', '.')), lo = parseFloat(String(form.boylam.value).replace(',', '.'));
     v.enlem = isNaN(la) ? null : la; v.boylam = isNaN(lo) ? null : lo;
-    v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire';
+    v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire'; v.durum = v.durum || 'Aktif';
     v.resimler = fotolar; v.ozellikler = etiketler;
 
     const hatalar = [];

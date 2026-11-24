@@ -83,6 +83,12 @@
     if (n.length === 10) n = '90' + n;
     return 'https://wa.me/' + n + (mesaj ? '?text=' + encodeURIComponent(mesaj) : '');
   };
+  // Türkçe karakterleri sadeleştirerek adres parçası üretir (scripts/olustur.mjs ile aynı olmalı)
+  BE.slug = (t) => String(t || '').toLocaleLowerCase('tr-TR')
+    .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u').replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
+  BE.ilanUrl = (i) => `ilan-${i.id}-${BE.slug(i.baslik)}.html`;
   BE.konum = (i) => [i.mahalle, i.ilce, i.il].filter(Boolean).join(', ');
   BE.kapak = (i) => (Array.isArray(i.resimler) && i.resimler.length ? i.resimler[0] : '');
   BE.depola = {
@@ -166,6 +172,7 @@
   BE.ilanlar = async function (secenek = {}) {
     if (!BE.db) throw new Error('Veritabanı bağlantısı kurulamadı.');
     let q = BE.db.from('ilanlar').select('*').eq('yayinda', true);
+    if (!secenek.tumu) q = q.eq('durum', 'Aktif');
     if (secenek.ids) q = q.in('id', secenek.ids.map(Number).filter(Boolean));
     if (secenek.oneCikan) q = q.eq('one_cikan', true);
     q = q.order('created_at', { ascending: false });
@@ -182,6 +189,8 @@
   };
 
   /* ---------- İlan kartı ---------- */
+  BE.DURUM_YAZI = { 'Satıldı': 'Bu ilan satılmıştır', 'Kiralandı': 'Bu ilan kiralanmıştır', 'Pasif': 'Bu ilan şu an aktif değil' };
+  BE.aktifMi = (i) => !i.durum || i.durum === 'Aktif';
   BE.kart = function (i) {
     const fav = BE.favoriMi(i.id);
     const resim = BE.kapak(i);
@@ -192,19 +201,19 @@
     if (i.bulundugu_kat) bilgiler.push(`<span title="Bulunduğu kat">${BE.ikon('kat')} ${BE.esc(i.bulundugu_kat)}${/^\d+$/.test(i.bulundugu_kat) ? '. Kat' : ''}</span>`);
     else if (i.kategori) bilgiler.push(`<span>${BE.ikon('ev')} ${BE.esc(i.kategori)}</span>`);
     return `
-    <article class="kart belir">
+    <article class="kart belir ${BE.aktifMi(i) ? '' : 'kart-pasif'}">
       <div class="kart-resim">
         ${resim ? `<img src="${BE.esc(resim)}" alt="${BE.esc(i.baslik)}" loading="lazy">` : `<div class="resim-yok"><img src="images/logo.png" alt=""><span>Fotoğraf yakında</span></div>`}
         <div class="kart-rozetler">
           <span class="rozet ${i.tip === 'Kiralık' ? 'rozet-kiralik' : 'rozet-satilik'}">${BE.esc(i.tip)}</span>
-          ${i.one_cikan ? '<span class="rozet rozet-one">Öne Çıkan</span>' : ''}
+          ${BE.aktifMi(i) ? (i.one_cikan ? '<span class="rozet rozet-one">Öne Çıkan</span>' : '') : `<span class="rozet rozet-durum">${BE.esc(i.durum === 'Pasif' ? 'Aktif Değil' : i.durum)}</span>`}
         </div>
         ${fotoSayi > 1 ? `<span class="kart-foto-sayi">${BE.ikon('kamera')} ${fotoSayi}</span>` : ''}
       </div>
       <button class="fav-btn ${fav ? 'aktif' : ''}" data-id="${i.id}" aria-pressed="${fav}" aria-label="${fav ? 'Favorilerden çıkar' : 'Favorilere ekle'}">${BE.ikon('kalp')}</button>
       <div class="kart-govde">
         <div class="kart-fiyat">${BE.fiyat(i)}</div>
-        <h3 class="kart-baslik"><a href="ilan.html?id=${i.id}">${BE.esc(i.baslik)}</a></h3>
+        <h3 class="kart-baslik"><a href="${BE.ilanUrl(i)}">${BE.esc(i.baslik)}</a></h3>
         <div class="kart-konum">${BE.ikon('konum')} ${BE.esc(BE.konum(i))}</div>
         <div class="kart-bilgi">${bilgiler.join('')}</div>
       </div>
@@ -230,6 +239,13 @@
   const MENU = [
     ['index.html', 'Ana Sayfa'], ['ilanlar.html', 'İlanlar'], ['hesaplamalar.html', 'Hesaplamalar'],
     ['rehber.html', 'Emlak Rehberi'], ['hakkimizda.html', 'Hakkımızda'], ['iletisim.html', 'İletişim']
+  ];
+
+  const POPULER = [
+    ['osmaniye-satilik-daire.html', 'Osmaniye Satılık Daire'], ['osmaniye-kiralik-daire.html', 'Osmaniye Kiralık Daire'],
+    ['osmaniye-satilik-ev.html', 'Osmaniye Satılık Ev'], ['osmaniye-kiralik-ev.html', 'Osmaniye Kiralık Ev'],
+    ['osmaniye-satilik-villa.html', 'Osmaniye Satılık Villa'], ['osmaniye-satilik-arsa.html', 'Osmaniye Satılık Arsa'],
+    ['osmaniye-kiralik-dukkan.html', 'Osmaniye Kiralık Dükkan']
   ];
 
   function ustHtml(a, aktif) {
@@ -283,6 +299,10 @@
         <ul class="alt-saatler">${(a.calisma_saatleri || []).map((g) => `<li><span>${BE.esc(g.gun)}</span><span>${BE.esc(BE.saatMetni(g))}</span></li>`).join('')}</ul>
         ${a.calisma_notu ? `<p style="font-size:.8rem;margin-top:10px">${BE.esc(a.calisma_notu)}</p>` : ''}
       </div>
+    </div>
+    <div class="kap alt-aramalar">
+      <strong>Popüler Aramalar:</strong>
+      ${POPULER.map(([u, t]) => `<a href="${u}">${t}</a>`).join('')}
     </div>
     <div class="kap alt-telif">
       <span>© ${new Date().getFullYear()} ${BE.esc(a.firma_adi)}. Tüm hakları saklıdır.</span>

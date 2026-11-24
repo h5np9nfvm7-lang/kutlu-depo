@@ -10,7 +10,7 @@
 <link rel="icon" href="images/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 <header id="site-ust"></header>
@@ -48,8 +48,8 @@
 <footer id="site-alt"></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=4"></script>
-<script src="js/common.js?v=4"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/common.js?v=6"></script>
 <script>
 (async function () {
   const { $, esc } = BE;
@@ -102,7 +102,7 @@
 
   const fav = BE.favoriler();
   if (!fav.length) { ciz(); return; }
-  try { ilanlar = await BE.ilanlar({ ids: fav }); ciz(); }
+  try { ilanlar = await BE.ilanlar({ ids: fav, tumu: true }); ciz(); }
   catch (err) { console.error(err); el.innerHTML = BE.hataHtml(); }
 })();
 </script>

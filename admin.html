@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=4">
-<link rel="stylesheet" href="css/admin.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/admin.css?v=6">
 </head>
 <body class="admin">
 
@@ -67,7 +67,7 @@
         <input type="search" id="il-ara" placeholder="Başlık, ilan no, mahalle ara…" aria-label="İlan ara">
         <select id="il-durum" aria-label="Durum filtresi">
           <option value="">Tüm ilanlar</option><option value="yayinda">Yayında olanlar</option><option value="kapali">Yayında olmayanlar</option>
-          <option value="Satılık">Satılık</option><option value="Kiralık">Kiralık</option><option value="one">Öne çıkanlar</option>
+          <option value="Satılık">Satılık</option><option value="Kiralık">Kiralık</option><option value="one">Öne çıkanlar</option><option value="aktif">Aktif (yayında)</option><option value="pasif">Satılan / Kiralanan / Pasif</option>
         </select>
       </div>
       <div class="kart-blok" style="padding:0;overflow:hidden"><div class="tablo-kap"><table class="tablo admin-tablo" id="il-tablo"></table></div></div>
@@ -160,6 +160,10 @@
             <label class="anahtar"><input type="checkbox" name="yayinda" checked><span></span> Sitede yayında</label>
             <label class="anahtar"><input type="checkbox" name="one_cikan"><span></span> Ana sayfada öne çıkar</label>
           </div>
+          <label class="alan" style="max-width:360px;margin-top:16px"><span>İlan Durumu</span>
+            <select name="durum"><option>Aktif</option><option>Satıldı</option><option>Kiralandı</option><option>Pasif</option></select>
+          </label>
+          <p style="font-size:.88rem;color:var(--metin-soluk);margin:8px 0 0">Satıldı, Kiralandı veya Pasif yapılan ilan 30 gün boyunca kendi sayfasında bilgi notuyla görünür, ilan listelerinde görünmez. 30 gün sonra sitede kendiliğinden gizlenir.</p>
         </div>
 
         <div class="kaydet-cubuk">
@@ -254,6 +258,20 @@
   </main>
 </div>
 
+<!-- KALDIRMA SEÇENEKLERİ -->
+<div class="modal gizli" id="kaldir-modal" role="dialog" aria-modal="true" aria-labelledby="kaldir-baslik">
+  <div class="modal-kutu" style="max-width:520px">
+    <h2 id="kaldir-baslik">İlanı kaldır</h2>
+    <p>İlanı nasıl kaldırmak istiyorsunuz?</p>
+    <div class="kaldir-secenekler">
+      <button type="button" data-kaldir="satildi"><strong id="kaldir-satildi">Satıldı</strong><span id="kaldir-satildi-aciklama"></span></button>
+      <button type="button" data-kaldir="pasif"><strong>Pasife al</strong><span>İlan sayfası 30 gün boyunca "Bu ilan şu an aktif değil" notuyla görünür, sonra kendiliğinden gizlenir. İstediğiniz zaman tekrar aktif edebilirsiniz.</span></button>
+      <button type="button" data-kaldir="sil" class="tehlike"><strong>Sil</strong><span>İlan ve fotoğrafları hemen ve kalıcı olarak silinir. Geri alınamaz.</span></button>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px"><button type="button" class="btn btn-cizgi" id="kaldir-vazgec" data-kaldir="">Vazgeç</button></div>
+  </div>
+</div>
+
 <!-- ONAY PENCERESİ -->
 <div class="modal gizli" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-baslik">
   <div class="modal-kutu">
@@ -268,9 +286,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="js/config.js?v=4"></script>
-<script src="js/common.js?v=4"></script>
-<script src="js/hesap.js?v=4"></script>
-<script src="js/admin.js?v=4"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/common.js?v=6"></script>
+<script src="js/hesap.js?v=6"></script>
+<script src="js/admin.js?v=6"></script>
 </body>
 </html>

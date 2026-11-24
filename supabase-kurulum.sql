@@ -95,9 +95,33 @@ create trigger ilanlar_guncelleme before update on public.ilanlar
 
 alter table public.ilanlar enable row level security;
 
+-- ---------- İLAN DURUMU (Aktif / Satıldı / Kiralandı / Pasif) ----------
+-- Satıldı, Kiralandı veya Pasif yapılan ilan 30 gün boyunca kendi sayfasında
+-- bilgi notuyla görünür (listelerde görünmez), sonra ziyaretçilerden gizlenir.
+alter table public.ilanlar add column if not exists durum text not null default 'Aktif';
+alter table public.ilanlar add column if not exists durum_tarihi timestamptz;
+alter table public.ilanlar drop constraint if exists ilanlar_durum_kontrol;
+alter table public.ilanlar add constraint ilanlar_durum_kontrol
+  check (durum in ('Aktif', 'Satıldı', 'Kiralandı', 'Pasif'));
+
+create or replace function public.ilan_durum_tarihi()
+returns trigger language plpgsql as $$
+begin
+  if tg_op = 'INSERT' or new.durum is distinct from old.durum then
+    new.durum_tarihi = case when new.durum = 'Aktif' then null else now() end;
+  end if;
+  return new;
+end; $$;
+drop trigger if exists ilanlar_durum_tarihi on public.ilanlar;
+create trigger ilanlar_durum_tarihi before insert or update on public.ilanlar
+  for each row execute function public.ilan_durum_tarihi();
+
 drop policy if exists "ilan okuma" on public.ilanlar;
 create policy "ilan okuma" on public.ilanlar
-  for select using (yayinda = true or public.yonetici_mi());
+  for select using (
+    (yayinda = true and (durum = 'Aktif' or durum_tarihi > now() - interval '30 days'))
+    or public.yonetici_mi()
+  );
 
 drop policy if exists "ilan ekleme" on public.ilanlar;
 create policy "ilan ekleme" on public.ilanlar

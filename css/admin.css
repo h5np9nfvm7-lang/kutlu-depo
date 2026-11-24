@@ -122,3 +122,12 @@ body.admin { background: var(--gri-acik); }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .modal-kutu { background: #fff; border-radius: 12px; padding: 26px; max-width: 440px; width: 100%; box-shadow: var(--golge-buyuk); }
 .modal-kutu h2 { font-size: 1.25rem; }
+
+.durum-pasif { background: var(--siyah); border-color: var(--siyah); color: #fff; cursor: default; }
+.kaldir-secenekler { display: flex; flex-direction: column; gap: 10px; }
+.kaldir-secenekler button { text-align: left; border: 1.5px solid var(--kenarlik); background: #fff; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; font: inherit; }
+.kaldir-secenekler button:hover { border-color: var(--siyah); background: var(--gri-acik); }
+.kaldir-secenekler button strong { font-family: var(--font-baslik); font-size: 1.05rem; }
+.kaldir-secenekler button span { color: var(--metin-soluk); font-size: .9rem; }
+.kaldir-secenekler button.tehlike strong { color: var(--kirmizi); }
+.kaldir-secenekler button.tehlike:hover { border-color: var(--kirmizi); background: var(--kirmizi-acik); }

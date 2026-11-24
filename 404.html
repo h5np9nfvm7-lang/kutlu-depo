@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sayfa Bulunamadı | Bizim Emlak</title>
+<meta name="robots" content="noindex">
+<script>
+  // Yeni eklenen bir ilanın sayfası henüz üretilmediyse ilan detayına yönlendir
+  (function () {
+    var m = location.pathname.match(/ilan-(\d+)(?:-[^/]*)?(?:\.html)?$/);
+    if (m) location.replace('/ilan.html?id=' + m[1]);
+  })();
+</script>
+<link rel="icon" href="/images/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css?v=6">
+</head>
+<body>
+<main class="kap" style="min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center">
+  <div>
+    <img src="/images/logo.png" alt="Bizim Emlak" style="max-width:240px;margin:0 auto 24px">
+    <h1>Aradığınız sayfa bulunamadı</h1>
+    <p>Bu ilan yayından kaldırılmış veya adres hatalı olabilir.</p>
+    <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn-kirmizi" href="/ilanlar.html">Tüm İlanlar</a>
+      <a class="btn btn-cizgi" href="/">Ana Sayfa</a>
+    </p>
+  </div>
+</main>
+</body>
+</html>

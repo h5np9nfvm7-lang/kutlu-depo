@@ -3,7 +3,7 @@
   const { $, $$, esc, ikon } = BE;
   const H = window.BE_HESAP;
   const alan = $('#ilan-alan');
-  const id = BE.param('id');
+  const id = BE.param('id') || (window.BE_ILAN_ID ? String(window.BE_ILAN_ID) : null);
   const a = await BE.sayfaBaslat('ilanlar.html');
 
   const bulunamadi = (m) => {
@@ -19,6 +19,10 @@
   if (!i) return bulunamadi();
 
   BE.sonBakilanEkle(i.id);
+  // Arama motorları için asıl adres
+  let kan = document.querySelector('link[rel=canonical]');
+  if (!kan) { kan = document.createElement('link'); kan.rel = 'canonical'; document.head.appendChild(kan); }
+  kan.href = 'https://bizimemlak.biz/' + BE.ilanUrl(i);
   if (BE.db) BE.db.rpc('ilan_goruntulendi', { ilan_no: i.id }).then(() => {}, () => {});
 
   // Başlık & paylaşım bilgileri
@@ -48,6 +52,9 @@
 
   alan.innerHTML = `
   <div class="yol" style="color:var(--metin-soluk)"><a href="./">Ana Sayfa</a> / <a href="ilanlar.html">İlanlar</a> / <a href="ilanlar.html?kategori=${encodeURIComponent(i.kategori)}">${esc(i.kategori)}</a> / #${i.id}</div>
+  ${BE.aktifMi(i) ? '' : `<div class="durum-bandi" role="status"><div><strong>${esc(BE.DURUM_YAZI[i.durum] || 'Bu ilan aktif değil')}</strong>
+    <p>Benzer bir ${esc((i.kategori || 'mülk').toLocaleLowerCase('tr-TR'))} arıyorsanız size yardımcı olalım.</p></div>
+    <a class="btn btn-kirmizi" href="ilanlar.html?tip=${encodeURIComponent(i.tip)}&kategori=${encodeURIComponent(i.kategori)}">Benzer İlanları Gör</a></div>`}
   <div class="detay-duzen">
     <div>
       <div class="galeri">
@@ -86,7 +93,7 @@
         <p style="margin:10px 0 0;font-size:.9rem"><a class="btn btn-cizgi btn-kucuk" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${i.enlem},${i.boylam}">${ikon('harita')} Google Haritalar'da Aç / Yol Tarifi</a></p>
         <p style="font-size:.82rem;color:var(--metin-soluk);margin:8px 0 0">Harita konumu yaklaşık olarak gösterilmektedir.</p></div>` : ''}
 
-      ${i.tip === 'Satılık' && i.fiyat ? `<div class="kart-blok" id="kredi-blok"><h2>Kredi Hesapla</h2>
+      ${BE.aktifMi(i) && i.tip === 'Satılık' && i.fiyat ? `<div class="kart-blok" id="kredi-blok"><h2>Kredi Hesapla</h2>
         <div class="form-izgara">
           <label class="alan"><span>Ev Fiyatı (TL)</span><input type="text" inputmode="numeric" id="k-fiyat" value="${BE.sayi(i.fiyat)}"></label>
           <label class="alan"><span>Peşinat (TL)</span><input type="text" inputmode="numeric" id="k-pesinat" value="${BE.sayi(Math.round(i.fiyat * 0.2))}"></label>
@@ -117,7 +124,7 @@
           <div style="display:flex;flex-direction:column;gap:10px">
             <input type="text" name="ad" placeholder="Adınız Soyadınız" aria-label="Adınız Soyadınız" required maxlength="100">
             <input type="tel" name="tel" placeholder="Telefon numaranız" aria-label="Telefon" required maxlength="30">
-            <textarea name="mesaj" rows="3" style="min-height:80px" aria-label="Mesaj" maxlength="1000">Bu ilan hakkında bilgi almak istiyorum.</textarea>
+            <textarea name="mesaj" rows="3" style="min-height:80px" aria-label="Mesaj" maxlength="1000">${BE.aktifMi(i) ? 'Bu ilan hakkında bilgi almak istiyorum.' : 'Bu ilana benzer bir ilan arıyorum.'}</textarea>
             <button type="submit" class="btn btn-siyah btn-blok">Gönder</button>
           </div>
           <div id="ilan-form-sonuc" aria-live="polite"></div>
