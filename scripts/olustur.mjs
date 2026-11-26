@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=15';
+const SURUM = 'v=16';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -26,7 +26,7 @@ const SAYFALAR = [
     giris: 'Osmaniye Merkez ve ilçelerinde satılık daire mi arıyorsunuz? Bizim Emlak olarak 26 yıldır Osmaniye\'de daire alım satımında aracılık yapıyoruz. 1+1\'den 4+1\'e kadar, asansörlü, site içinde veya krediye uygun satılık daireleri aşağıda bulabilirsiniz.',
     sss: [
       ['Osmaniye\'de satılık daire fiyatları ne kadar?', 'Fiyatlar mahalleye, bina yaşına, metrekareye ve katına göre değişir. Güncel ilanlarımızdaki fiyatları yukarıda görebilir, aradığınız özelliklere uygun daire için bizi arayabilirsiniz.'],
-      ['Krediye uygun satılık daire var mı?', 'İlan listesinde "Krediye uygun" işaretli daireler konut kredisiyle alınabilir. Kredi sürecinde de size yol gösteriyoruz.'],
+      ['Krediye uygun satılık daire var mı?', 'İlan listesinde "Krediye uygun" işaretli daireler konut kredisine uygun olarak ilan edilmiştir. Kredi koşulları için bankanıza danışın.'],
       ['Daireyi görmeye nasıl gidebilirim?', 'İlan sayfasındaki telefon veya WhatsApp butonuyla bize ulaşın, size uygun saatte gösterim ayarlayalım.']
     ]
   },
@@ -164,10 +164,10 @@ SAYFALAR.push(
     dosya: 'osmaniye-krediye-uygun-satilik-daire', tip: 'Satılık', kategoriler: ['Daire'], ek: true,
     filtre: (i) => i.tip === 'Satılık' && KONUT.includes(i.kategori) && i.krediye_uygun,
     baslik: 'Osmaniye Krediye Uygun Satılık Daire İlanları', kisa: 'Osmaniye krediye uygun daire',
-    giris: 'Osmaniye\'de konut kredisiyle alınabilecek satılık daire ve ev ilanlarımız aşağıda. Kredi başvurusu ve ekspertiz sürecinde size yol gösteriyoruz.',
+    giris: 'Osmaniye\'de konut kredisiyle alınabilecek satılık daire ve ev ilanlarımız aşağıda. Kredi tutarı, faiz ve onay tamamen bankanın değerlendirmesine bağlıdır.',
     sss: [
       ['Krediye uygun ne demek?', 'Evin iskanlı ve kat mülkiyetli olması gibi bankaların aradığı şartları taşıdığı anlamına gelir. Kesin onay bankanın ekspertizine bağlıdır.'],
-      ['Kredi onayını kim verir?', 'Kredi onayını banka verir. Biz evin belgelerinin hazır olmasına yardımcı oluruz.'],
+      ['Kredi onayını kim verir?', 'Kredi onayını ve tutarını yalnızca banka verir; ekspertiz değerine ve sizin gelir durumunuza göre belirlenir.'],
       ['Peşinat ne kadar olmalı?', 'Bankalar evin ekspertiz değerinin bir kısmını kredilendirir; kalan kısmı peşinat olarak ödenir. Güncel oranları bankanıza sorun.']
     ]
   },

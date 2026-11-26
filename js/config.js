@@ -52,8 +52,7 @@ window.BE_VARSAYILAN_AYARLAR = {
     { baslik: 'Kiralama', aciklama: 'Güvenilir kiracı ve uygun ev arayanlar için aracılık.' },
     { baslik: 'Gayrimenkul Değerleme', aciklama: 'Bölge verilerine dayalı ücretsiz fiyat önerisi.' },
     { baslik: 'Yatırım Danışmanlığı', aciklama: 'Getirisi yüksek arsa ve konut fırsatları.' },
-    { baslik: 'Tapu İşlemlerinde Destek', aciklama: 'Evrak hazırlığından tapu gününe kadar yanınızdayız.' },
-    { baslik: 'Kredi Danışmanlığı', aciklama: 'Konut kredisi sürecinde yönlendirme ve destek.' }
+    { baslik: 'Tapu İşlemlerinde Destek', aciklama: 'Evrak hazırlığından tapu gününe kadar yanınızdayız.' }
   ],
   neden_biz: [
     { baslik: 'Güvenilir Hizmet', aciklama: 'Yılların verdiği tecrübe ve şeffaf çalışma anlayışı.' },
