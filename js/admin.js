@@ -319,16 +319,19 @@
     if ($('#filigran').checked) {
       try {
         const logo = await logoYukle();
-        // Arka plansız, küçük logo (fotoğrafın %14'ü); koyu zeminde de seçilsin diye hafif gölge
+        // Arka plansız, küçük logo (fotoğrafın %14'ü). Net görünsün diye tam opak çizilir ve
+        // etrafına ince, keskin beyaz kontur eklenir (koyu zeminde de okunur, bulanık parlama yok).
         const lw = Math.round(c.width * 0.14), lh = Math.round(lw * logo.height / logo.width), pay = Math.round(c.width * 0.02);
-        x.save();
-        x.globalAlpha = 0.9;
-        x.shadowColor = 'rgba(255,255,255,0.55)'; x.shadowBlur = Math.max(2, Math.round(lw * 0.03));
-        x.drawImage(logo, c.width - lw - pay, c.height - lh - pay, lw, lh);
-        x.restore();
+        const lx = c.width - lw - pay, ly = c.height - lh - pay, k = Math.max(1, Math.round(lw / 110));
+        const ak = document.createElement('canvas'); ak.width = lw; ak.height = lh;
+        const ax = ak.getContext('2d'); ax.imageSmoothingQuality = 'high'; ax.drawImage(logo, 0, 0, lw, lh);
+        ax.globalCompositeOperation = 'source-in'; ax.fillStyle = '#fff'; ax.fillRect(0, 0, lw, lh);
+        for (let dx = -k; dx <= k; dx++) for (let dy = -k; dy <= k; dy++) if (dx || dy) x.drawImage(ak, lx + dx, ly + dy);
+        x.imageSmoothingQuality = 'high';
+        x.drawImage(logo, lx, ly, lw, lh);
       } catch (e) { console.warn('Logo eklenemedi', e); }
     }
-    let blob = await new Promise((coz) => c.toBlob(coz, 'image/webp', 0.82));
+    let blob = await new Promise((coz) => c.toBlob(coz, 'image/webp', 0.9));
     if (!blob || blob.type !== 'image/webp') blob = await new Promise((coz) => c.toBlob(coz, 'image/jpeg', 0.85));
     return blob;
   }
