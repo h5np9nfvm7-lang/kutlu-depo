@@ -61,6 +61,10 @@
   const dn = (a.danismanlar || []).find((d) => d.id && d.id === i.danisman_id) || null;
   const aramaTel = (dn && dn.telefon) || a.telefon;
   const wpNo = dn && dn.telefon ? (dn.whatsapp ? dn.telefon : '') : a.whatsapp;
+  // Sahibinden: ilana özel link aktifse o ilana, yoksa (veya ilan satıldıysa) mağaza sayfasına
+  const sahibindenMi = (u) => /^https:\/\/([a-z0-9-]+\.)*sahibinden\.com(\/|$)/i.test(String(u || ''));
+  const sahibindenIlan = BE.aktifMi(i) && sahibindenMi(i.sahibinden_url) ? i.sahibinden_url : '';
+  const sahibindenLink = sahibindenIlan || (sahibindenMi(a.sahibinden_magaza) ? a.sahibinden_magaza : '');
   const wpMesaj = `Merhaba, ${i.id} numaralı "${i.baslik}" ilanı hakkında bilgi almak istiyorum. ${location.href}`;
   // Ekranın kenarındaki sabit WhatsApp / Ara butonları da bu ilanda danışmana gitsin
   if (dn && dn.telefon) {
@@ -127,6 +131,7 @@
         <div class="butonlar">
           ${aramaTel ? `<a class="btn btn-kirmizi btn-blok" href="${BE.telLink(aramaTel)}">${ikon('telefon')} ${esc(aramaTel)}</a>` : ''}
           ${wpNo ? `<a class="btn btn-wp btn-blok" target="_blank" rel="noopener" href="${BE.wpLink(wpNo, wpMesaj)}">WhatsApp'tan Sor</a>` : ''}
+          ${sahibindenLink ? `<a class="btn btn-sahibinden btn-blok" target="_blank" rel="noopener" href="${esc(sahibindenLink)}">${sahibindenIlan ? "Sahibinden'de Görüntüle" : "Sahibinden Mağazamız"}</a>` : ''}
           ${dn && dn.telefon && a.telefon && dn.telefon !== a.telefon ? `<span class="ofis-tel">Ofis: <a href="${BE.telLink(a.telefon)}">${esc(a.telefon)}</a></span>` : ''}
           <div class="satir-btn">
             <button type="button" class="btn btn-cizgi btn-kucuk fav-btn-detay" id="fav-detay">${ikon('kalp')} <span>${fav ? 'Favoride' : 'Favorile'}</span></button>

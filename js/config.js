@@ -41,6 +41,7 @@ window.BE_VARSAYILAN_AYARLAR = {
   tecrube_yili: 26,
   hizmet_bolgesi: 'Osmaniye Merkez ve ilçeleri',
   danisman_adi: '',
+  sahibinden_magaza: 'https://bizimemlakosmaniye.sahibinden.com/', // Sahibinden mağaza linki (Panel > Site Ayarları > Diğer)
   danismanlar: [], // { id, ad, unvan, telefon, whatsapp, foto } - Panel > Site Ayarları > Danışmanlar
   hero_baslik: 'Siz Hayal Edin, Biz Gerçekleştirelim',
   hero_alt: '26 yıllık tecrübemizle Osmaniye\'de satılık ve kiralık gayrimenkulde yanınızdayız.',

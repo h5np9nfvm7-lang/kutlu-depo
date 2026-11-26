@@ -342,3 +342,10 @@ alter table public.ilanlar add constraint ilanlar_yetki_no_uzunluk check (yetki_
 alter table public.ilanlar add column if not exists danisman_id text;
 alter table public.ilanlar drop constraint if exists ilanlar_danisman_id_uzunluk;
 alter table public.ilanlar add constraint ilanlar_danisman_id_uzunluk check (danisman_id is null or char_length(danisman_id) <= 40);
+
+-- ===========================================================
+-- İlanın sahibinden linki (boşsa ilan sayfasındaki buton mağaza sayfasına gider)
+-- ===========================================================
+alter table public.ilanlar add column if not exists sahibinden_url text;
+alter table public.ilanlar drop constraint if exists ilanlar_sahibinden_url_https;
+alter table public.ilanlar add constraint ilanlar_sahibinden_url_https check (sahibinden_url is null or (sahibinden_url ~* '^https://([a-z0-9-]+[.])*sahibinden[.]com(/|$)' and char_length(sahibinden_url) <= 500));
