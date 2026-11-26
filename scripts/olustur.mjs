@@ -242,9 +242,12 @@ const BAS = (o) => `<!DOCTYPE html>
 <meta property="og:url" content="${SITE}/${o.yol}">
 <meta property="og:title" content="${esc(o.title)}">
 <meta property="og:description" content="${esc(o.description)}">
-<meta property="og:image" content="${esc(o.resim || SITE + '/images/logo.png')}">
+<meta property="og:image" content="${esc(o.resim || SITE + '/images/paylas.jpg')}">${o.resim ? '' : '\n<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'}
+<meta property="og:site_name" content="Bizim Emlak"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#111111">
-<link rel="icon" href="images/favicon.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/images/favicon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <link rel="stylesheet" href="css/style.css?${SURUM}">
 ${(o.ld || []).map((x) => `<script type="application/ld+json">${JSON.stringify(x).replace(/</g, '\\u003c')}</script>`).join('\n')}
 </head>
