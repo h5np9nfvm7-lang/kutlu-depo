@@ -142,3 +142,11 @@ body.admin { background: var(--gri-acik); }
 .ist-satir:last-child { border: 0; }
 .ist-bar { height: 6px; background: var(--gri-acik); border-radius: 3px; margin-top: 4px; overflow: hidden; }
 .ist-bar div { height: 100%; background: var(--kirmizi); }
+
+/* Danışmanlar */
+.danisman-satir { display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--kenarlik); flex-wrap: wrap; }
+.danisman-satir:last-child { border-bottom: 0; }
+.danisman-foto { width: 92px; height: 92px; border-radius: 50%; border: 2px dashed var(--kenarlik); background: var(--gri-acik); cursor: pointer; position: relative; overflow: hidden; flex: none; padding: 0; display: flex; align-items: center; justify-content: center; }
+.danisman-foto img { width: 100%; height: 100%; object-fit: cover; }
+.danisman-foto span { font-family: var(--font-baslik); font-weight: 800; font-size: 1.6rem; color: var(--metin-soluk); }
+.danisman-foto small { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.6); color: #fff; font-size: .7rem; padding: 3px 0; }

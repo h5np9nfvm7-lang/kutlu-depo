@@ -10,8 +10,8 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=16">
-<link rel="stylesheet" href="css/admin.css?v=16">
+<link rel="stylesheet" href="css/style.css?v=17">
+<link rel="stylesheet" href="css/admin.css?v=17">
 </head>
 <body class="admin">
 
@@ -102,6 +102,7 @@
               <div class="secim-grup" data-ad="tip"><button type="button" data-v="Satılık">Satılık</button><button type="button" data-v="Kiralık">Kiralık</button></div></div>
             <label class="alan"><span>Kategori *</span><select name="kategori"><option>Daire</option><option>Villa</option><option>Müstakil Ev</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option></select></label>
             <label class="alan"><span>Fiyat (TL) *</span><input type="text" name="fiyat" inputmode="numeric" placeholder="Örn. 2.500.000"></label>
+            <label class="alan"><span>Danışman <small style="font-weight:400;color:var(--metin-soluk)">(Site Ayarları'ndan eklenir)</small></span><select name="danisman_id" id="danisman-sec"></select></label>
             <label class="alan tam"><span>Yetki Belge No * <small style="font-weight:400;color:var(--metin-soluk)">(yasal zorunluluk: girilmeyen ilan sitede görünmez)</small></span><input type="text" name="yetki_no" maxlength="50" placeholder="Örn. 8000xxx"></label>
           </div>
         </div>
@@ -237,9 +238,16 @@
             <label class="alan"><span>E-posta</span><input type="email" data-a="eposta"></label>
             <label class="alan tam"><span>Adres</span><input type="text" data-a="adres"></label>
             <label class="alan tam"><span>Haritada aranacak adres (iletişim sayfasındaki harita için)</span><input type="text" data-a="harita_arama"></label>
-            <label class="alan"><span>Danışman Adı (ilan sayfasında görünür)</span><input type="text" data-a="danisman_adi"></label>
+            <label class="alan"><span>Danışman seçilmeyen ilanlarda görünecek ad (isteğe bağlı)</span><input type="text" data-a="danisman_adi"></label>
             <label class="alan"><span>Hizmet Bölgesi</span><input type="text" data-a="hizmet_bolgesi"></label>
           </div>
+        </div>
+
+        <div class="kart-blok"><h2>Danışmanlar</h2>
+          <p style="margin-top:0;color:var(--metin-soluk);font-size:.92rem">Buraya eklediğiniz danışmanları ilan girerken seçebilirsiniz. İlan sayfasında seçilen danışmanın adı, fotoğrafı ve telefonu görünür.</p>
+          <div id="danisman-liste"></div>
+          <button type="button" class="btn btn-cizgi btn-kucuk" id="danisman-ekle">+ Danışman Ekle</button>
+          <input type="file" id="danisman-foto-dosya" accept="image/*" hidden>
         </div>
 
         <div class="kart-blok"><h2>Çalışma Saatleri</h2>
@@ -324,11 +332,11 @@
   </div>
 </div>
 
-<script src="vendor/supabase.js?v=16"></script>
+<script src="vendor/supabase.js?v=17"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="js/config.js?v=16"></script>
-<script src="js/common.js?v=16"></script>
-<script src="js/hesap.js?v=16"></script>
-<script src="js/admin.js?v=16"></script>
+<script src="js/config.js?v=17"></script>
+<script src="js/common.js?v=17"></script>
+<script src="js/hesap.js?v=17"></script>
+<script src="js/admin.js?v=17"></script>
 </body>
 </html>

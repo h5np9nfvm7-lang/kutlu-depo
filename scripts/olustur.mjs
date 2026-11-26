@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=16';
+const SURUM = 'v=17';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -323,7 +323,8 @@ function ilanSayfasi(i, ayar) {
       ${(i.ozellikler || []).length ? `<div class="kart-blok"><h2>Özellikler</h2><ul class="ozellik-liste">${i.ozellikler.map((o) => `<li>${esc(o)}</li>`).join('')}</ul></div>` : ''}
       ${/^https:\/\//.test(i.video_url || '') ? `<p><a href="${esc(i.video_url)}" target="_blank" rel="noopener">İlan videosunu izleyin</a></p>` : ''}
       ${/^https:\/\//.test(i.sanal_tur_url || '') ? `<p><a href="${esc(i.sanal_tur_url)}" target="_blank" rel="noopener">360° sanal tur</a></p>` : ''}
-      <p>Bilgi ve gösterim için: <a href="tel:${esc(String(ayar.telefon || '').replace(/[^\d+]/g, '').replace(/^0/, '+90'))}">${esc(ayar.telefon || '')}</a></p>
+      ${(() => { const d = (ayar.danismanlar || []).find((x) => x.id && x.id === i.danisman_id); const t = (d && d.telefon) || ayar.telefon || ''; const tl = (n) => 'tel:' + String(n).replace(/[^\d+]/g, '').replace(/^0/, '+90');
+        return `<p>${d ? `İlan danışmanı: <strong>${esc(d.ad)}</strong>${d.unvan ? ' (' + esc(d.unvan) + ')' : ''}<br>` : ''}Bilgi ve gösterim için: <a href="${tl(t)}">${esc(t)}</a></p>`; })()}
     </div>
   </section>
   <section class="bolum bolum-gri gizli" id="benzer-bolum">

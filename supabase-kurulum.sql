@@ -335,3 +335,10 @@ drop policy if exists "mesaj gonderme" on public.mesajlar;
 alter table public.ilanlar add column if not exists yetki_no text;
 alter table public.ilanlar drop constraint if exists ilanlar_yetki_no_uzunluk;
 alter table public.ilanlar add constraint ilanlar_yetki_no_uzunluk check (yetki_no is null or char_length(yetki_no) <= 50);
+
+-- ===========================================================
+-- İlan danışmanı (danışmanlar Site Ayarları'nda tutulur: veri->'danismanlar')
+-- ===========================================================
+alter table public.ilanlar add column if not exists danisman_id text;
+alter table public.ilanlar drop constraint if exists ilanlar_danisman_id_uzunluk;
+alter table public.ilanlar add constraint ilanlar_danisman_id_uzunluk check (danisman_id is null or char_length(danisman_id) <= 40);

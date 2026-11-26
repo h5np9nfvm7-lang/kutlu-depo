@@ -240,7 +240,7 @@
     $('#il-tablo').innerHTML = `<thead><tr><th></th><th>İlan</th><th>Fiyat</th><th>Durum</th><th style="text-align:right">İşlemler</th></tr></thead><tbody>` +
       (l.length ? l.map((i) => `<tr class="${i.yayinda && BE.aktifMi(i) ? '' : 'kapali'}">
         <td>${BE.kapak(i) ? `<img class="kucuk-resim" src="${esc(BE.kapak(i))}" alt="" loading="lazy">` : '<div class="kucuk-resim"></div>'}</td>
-        <td><strong>#${i.id} ${esc(i.baslik)}</strong><br><small>${esc(i.tip)} · ${esc(i.kategori)} · ${esc(BE.konum(i))} · ${ikon('goz')} ${i.goruntulenme || 0}</small></td>
+        <td><strong>#${i.id} ${esc(i.baslik)}</strong><br><small>${esc(i.tip)} · ${esc(i.kategori)} · ${esc(BE.konum(i))} · ${ikon('goz')} ${i.goruntulenme || 0}${(() => { const d = (ayarKayitli.danismanlar || []).find((x) => x.id === i.danisman_id); return d ? ' · 👤 ' + esc(d.ad) : ''; })()}</small></td>
         <td style="white-space:nowrap"><strong>${BE.fiyat(i)}</strong></td>
         <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
           <button type="button" class="durum-btn ${i.yayinda ? 'acik' : ''}" data-degistir="yayinda" data-id="${i.id}">${i.yayinda ? '● Yayında' : '○ Yayında değil'}</button>
@@ -482,6 +482,11 @@
     PARA.forEach((n) => { form[n].value = i && i[n] != null ? BE.sayi(i[n]) : ''; });
     BAYRAK.forEach((n) => { form[n].checked = i ? !!i[n] : n === 'yayinda'; });
     form.video_url.value = (i && i.video_url) || '';
+    const dl = (ayarKayitli.danismanlar || []);
+    let sonDanisman = ''; try { sonDanisman = localStorage.getItem('be_danisman') || ''; } catch (e) {}
+    form.danisman_id.innerHTML = '<option value="">— Danışman seçilmedi (firma bilgileri görünür) —</option>' + dl.map((d) => `<option value="${esc(d.id)}">${esc(d.ad)}${d.unvan ? ' · ' + esc(d.unvan) : ''}</option>`).join('');
+    const secili = i ? (i.danisman_id || '') : sonDanisman;
+    form.danisman_id.value = dl.some((d) => d.id === secili) ? secili : '';
     let sonYetki = ''; try { sonYetki = localStorage.getItem('be_yetki_no') || ''; } catch (e) {}
     form.yetki_no.value = i ? (i.yetki_no || '') : sonYetki;
     form.sanal_tur_url.value = (i && i.sanal_tur_url) || '';
@@ -507,6 +512,7 @@
     v.enlem = isNaN(la) ? null : la; v.boylam = isNaN(lo) ? null : lo;
     v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire'; v.durum = v.durum || 'Aktif';
     v.resimler = fotolar; v.ozellikler = etiketler;
+    v.danisman_id = form.danisman_id.value || null;
     ['video_url', 'sanal_tur_url', 'yetki_no'].forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
 
     const hatalar = [];
@@ -530,14 +536,14 @@
         if (error) throw error; kayit = data;
         ilanlar.unshift(kayit);
       }
-      try { localStorage.setItem('be_yetki_no', v.yetki_no); } catch (e) {}
+      try { localStorage.setItem('be_yetki_no', v.yetki_no); localStorage.setItem('be_danisman', v.danisman_id || ''); } catch (e) {}
       fotoSil(silinecekFotolar); silinecekFotolar = [];
       kirli = false;
       BE.bildirim(duzenlenen ? 'İlan güncellendi' : 'İlan eklendi');
       location.hash = 'ilanlar';
     } catch (err) {
       console.error(err);
-      $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Kaydedilemedi: ${/yetki_no/.test(String(err && (err.message || err))) ? 'Veritabanında yetki numarası alanı henüz yok. Supabase SQL Editor\'de kurulum satırını çalıştırın.' : esc(hataMetni(err))}</span>`;
+      $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Kaydedilemedi: ${/danisman_id/.test(String(err && (err.message || err))) ? 'Veritabanında danışman alanı henüz yok. Supabase SQL Editor\'de kurulum satırını çalıştırın.' : /yetki_no/.test(String(err && (err.message || err))) ? 'Veritabanında yetki numarası alanı henüz yok. Supabase SQL Editor\'de kurulum satırını çalıştırın.' : esc(hataMetni(err))}</span>`;
     }
     btn.disabled = false; btn.textContent = 'İlanı Kaydet';
   });
@@ -690,12 +696,76 @@
     const ekle = e.target.closest('[data-liste-ekle]');
     if (ekle) { const ad = ekle.dataset.listeEkle; (ayarlar[ad] = ayarlar[ad] || []).push({ baslik: '', aciklama: '' }); kirli = true; listeCiz(ad); $(`#liste-${ad} .liste-satir:last-child input`).focus(); }
   });
+  /* ---------- Danışmanlar ---------- */
+  const yeniId = () => 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const basHarf = (ad) => String(ad || '?').trim().split(/\s+/).map((k) => k[0] || '').slice(0, 2).join('').toLocaleUpperCase('tr-TR');
+  function danismanCiz() {
+    const l = ayarlar.danismanlar || [];
+    $('#danisman-liste').innerHTML = l.length ? l.map((d, n) => `
+      <div class="danisman-satir" data-n="${n}">
+        <button type="button" class="danisman-foto" data-d-foto title="Fotoğraf seç">${d.foto ? `<img src="${esc(d.foto)}" alt="">` : `<span>${esc(basHarf(d.ad))}</span>`}<small>${d.foto ? 'Değiştir' : 'Fotoğraf'}</small></button>
+        <div class="form-izgara" style="flex:1">
+          <label class="alan"><span>Ad Soyad *</span><input type="text" data-d="ad" value="${esc(d.ad)}" maxlength="80"></label>
+          <label class="alan"><span>Ünvan</span><input type="text" data-d="unvan" value="${esc(d.unvan)}" maxlength="60" placeholder="Örn. Gayrimenkul Danışmanı"></label>
+          <label class="alan"><span>Telefon</span><input type="tel" data-d="telefon" value="${esc(d.telefon)}" maxlength="30" placeholder="Örn. 0532 123 45 67"></label>
+          <label class="anahtar" style="align-self:end"><input type="checkbox" data-d="whatsapp" ${d.whatsapp ? 'checked' : ''}><span></span> Bu numarada WhatsApp var</label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${d.foto ? '<button type="button" class="btn btn-cizgi btn-kucuk" data-d-foto-sil>Fotoğrafı kaldır</button>' : ''}
+          <button type="button" class="btn btn-cizgi btn-kucuk" data-d-sil style="color:var(--kirmizi);border-color:var(--kirmizi)">Danışmanı sil</button>
+        </div>
+      </div>`).join('') : '<p style="color:var(--metin-soluk)">Henüz danışman eklemediniz.</p>';
+  }
+  let fotoBekleyen = null;
+  $('#danisman-ekle').addEventListener('click', () => {
+    (ayarlar.danismanlar = ayarlar.danismanlar || []).push({ id: yeniId(), ad: '', unvan: 'Gayrimenkul Danışmanı', telefon: '', whatsapp: true, foto: '' });
+    kirli = true; danismanCiz(); $('#danisman-liste .danisman-satir:last-child [data-d=ad]').focus();
+  });
+  $('#danisman-liste').addEventListener('input', (e) => {
+    const s = e.target.closest('.danisman-satir'); if (!s || !e.target.dataset.d) return;
+    const d = ayarlar.danismanlar[Number(s.dataset.n)];
+    d[e.target.dataset.d] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    kirli = true;
+  });
+  $('#danisman-liste').addEventListener('click', async (e) => {
+    const s = e.target.closest('.danisman-satir'); if (!s) return;
+    const n = Number(s.dataset.n), d = ayarlar.danismanlar[n];
+    if (e.target.closest('[data-d-foto]')) { fotoBekleyen = n; $('#danisman-foto-dosya').value = ''; $('#danisman-foto-dosya').click(); }
+    else if (e.target.closest('[data-d-foto-sil]')) { d.foto = ''; kirli = true; danismanCiz(); }
+    else if (e.target.closest('[data-d-sil]')) {
+      const kullanan = ilanlar.filter((i) => i.danisman_id === d.id).length;
+      if (!(await onayla('Danışman silinsin mi?', `${d.ad || 'Bu danışman'} listeden kaldırılacak.${kullanan ? ` ${kullanan} ilanda bu danışman seçili; o ilanlarda firma bilgileri görünecek.` : ''} Kaydetmeyi unutmayın.`, 'Evet, Sil'))) return;
+      ayarlar.danismanlar.splice(n, 1); kirli = true; danismanCiz();
+    }
+  });
+  $('#danisman-foto-dosya').addEventListener('change', async (e) => {
+    const dosya = e.target.files[0]; if (!dosya || fotoBekleyen === null) return;
+    const d = ayarlar.danismanlar[fotoBekleyen];
+    try {
+      const blob = await kareFoto(dosya, 400);
+      const yol = `danisman/${d.id}-${Date.now()}.webp`;
+      const { error } = await db.storage.from(BUCKET).upload(yol, blob, { contentType: blob.type, cacheControl: '31536000', upsert: false });
+      if (error) throw error;
+      d.foto = db.storage.from(BUCKET).getPublicUrl(yol).data.publicUrl; kirli = true; danismanCiz();
+      BE.bildirim('Fotoğraf yüklendi. "Ayarları Kaydet"e basmayı unutmayın.');
+    } catch (err) { console.error(err); BE.bildirim('Fotoğraf yüklenemedi: ' + hataMetni(err), 'hata'); }
+  });
+  async function kareFoto(dosya, n) {
+    let k;
+    try { k = await createImageBitmap(dosya, { imageOrientation: 'from-image' }); }
+    catch { k = await new Promise((coz, red) => { const im = new Image(); im.onload = () => coz(im); im.onerror = red; im.src = URL.createObjectURL(dosya); }); }
+    const kenar = Math.min(k.width, k.height), sx = (k.width - kenar) / 2, sy = Math.max(0, (k.height - kenar) / 3);
+    const c = document.createElement('canvas'); c.width = c.height = n;
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, n, n); x.drawImage(k, sx, sy, kenar, kenar, 0, 0, n, n);
+    return new Promise((coz) => c.toBlob((b) => coz(b), 'image/webp', 0.85));
+  }
+
   function ayarFormu() {
     ayarlar = kopya(ayarKayitli);
     $$('[data-a]', af).forEach((x) => { x.value = ayarlar[x.dataset.a] ?? ''; });
     $$('[data-s]', af).forEach((x) => { x.value = (ayarlar.sosyal || {})[x.dataset.s] || ''; });
     $('#ayar-ilceler').value = (ayarlar.ilceler || []).join(', ');
-    saatCiz(); listeCiz('neden_biz'); listeCiz('hizmetler');
+    saatCiz(); listeCiz('neden_biz'); listeCiz('hizmetler'); danismanCiz();
     $('#ayar-durum').textContent = '';
     kirli = false;
   }
@@ -706,6 +776,7 @@
     ayarlar.ilceler = $('#ayar-ilceler').value.split(',').map((x) => x.trim()).filter(Boolean);
     ayarlar.neden_biz = (ayarlar.neden_biz || []).filter((x) => x.baslik.trim());
     ayarlar.hizmetler = (ayarlar.hizmetler || []).filter((x) => x.baslik.trim());
+    if ((ayarlar.danismanlar || []).some((d) => !String(d.ad || '').trim())) { $('#ayar-durum').innerHTML = '<span style="color:var(--kirmizi);font-weight:700">Danışmanlardan birinin adı boş. Adını yazın veya o danışmanı silin.</span>'; return; }
     const btn = $('button[type=submit]', af); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
     const { data, error } = await db.from('site_ayarlari').update({ veri: ayarlar, updated_at: new Date().toISOString() }).eq('id', 1).select('id');
     btn.disabled = false; btn.textContent = 'Ayarları Kaydet';
@@ -713,7 +784,7 @@
     kirli = false; ayarKayitli = kopya(ayarlar);
     $('#ilce-listesi').innerHTML = ayarlar.ilceler.map((i) => `<option>${esc(i)}</option>`).join('');
     $('#ayar-durum').textContent = 'Kaydedildi ✓ Sitede hemen görünür (sayfayı yenileyin).';
-    BE.bildirim('Ayarlar kaydedildi'); listeCiz('neden_biz'); listeCiz('hizmetler');
+    BE.bildirim('Ayarlar kaydedildi'); listeCiz('neden_biz'); listeCiz('hizmetler'); danismanCiz();
   });
 
   basla();

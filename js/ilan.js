@@ -57,6 +57,10 @@
       ${tur ? `<a class="btn btn-kirmizi" href="${esc(tur)}" target="_blank" rel="noopener">360° Sanal Turu Başlat</a>` : ''}
     </div></div>` : '';
 
+  // İlana atanmış danışman (Site Ayarları > Danışmanlar)
+  const dn = (a.danismanlar || []).find((d) => d.id && d.id === i.danisman_id) || null;
+  const aramaTel = (dn && dn.telefon) || a.telefon;
+  const wpNo = dn && dn.telefon ? (dn.whatsapp ? dn.telefon : '') : a.whatsapp;
   const wpMesaj = `Merhaba, ${i.id} numaralı "${i.baslik}" ilanı hakkında bilgi almak istiyorum. ${location.href}`;
   const fav = BE.favoriMi(i.id);
 
@@ -108,12 +112,13 @@
     <aside>
       <div class="kart-blok iletisim-kutu">
         <div class="danisman">
-          <div class="danisman-avatar"><img src="images/logo-beyaz.png" alt=""></div>
-          <div><strong style="font-family:var(--font-baslik)">${esc(a.danisman_adi || a.firma_adi)}</strong><br><span style="color:var(--metin-soluk);font-size:.9rem">${a.danisman_adi ? esc(a.firma_adi) : 'Gayrimenkul Danışmanı'}</span></div>
+          <div class="danisman-avatar">${dn && dn.foto ? `<img class="foto" src="${esc(dn.foto)}" alt="${esc(dn.ad)}">` : dn ? `<span class="harf">${esc(String(dn.ad).trim().split(/\s+/).map((k) => k[0] || '').slice(0, 2).join('').toLocaleUpperCase('tr-TR'))}</span>` : '<img src="images/logo-beyaz.png" alt="">'}</div>
+          <div><strong style="font-family:var(--font-baslik)">${esc(dn ? dn.ad : (a.danisman_adi || a.firma_adi))}</strong><br><span style="color:var(--metin-soluk);font-size:.9rem">${dn ? esc([dn.unvan, a.firma_adi].filter(Boolean).join(' · ')) : (a.danisman_adi ? esc(a.firma_adi) : 'Gayrimenkul Danışmanı')}</span></div>
         </div>
         <div class="butonlar">
-          ${a.telefon ? `<a class="btn btn-kirmizi btn-blok" href="${BE.telLink(a.telefon)}">${ikon('telefon')} ${esc(a.telefon)}</a>` : ''}
-          ${a.whatsapp ? `<a class="btn btn-wp btn-blok" target="_blank" rel="noopener" href="${BE.wpLink(a.whatsapp, wpMesaj)}">WhatsApp'tan Sor</a>` : ''}
+          ${aramaTel ? `<a class="btn btn-kirmizi btn-blok" href="${BE.telLink(aramaTel)}">${ikon('telefon')} ${esc(aramaTel)}</a>` : ''}
+          ${wpNo ? `<a class="btn btn-wp btn-blok" target="_blank" rel="noopener" href="${BE.wpLink(wpNo, wpMesaj)}">WhatsApp'tan Sor</a>` : ''}
+          ${dn && dn.telefon && a.telefon && dn.telefon !== a.telefon ? `<span class="ofis-tel">Ofis: <a href="${BE.telLink(a.telefon)}">${esc(a.telefon)}</a></span>` : ''}
           <div class="satir-btn">
             <button type="button" class="btn btn-cizgi btn-kucuk fav-btn-detay" id="fav-detay">${ikon('kalp')} <span>${fav ? 'Favoride' : 'Favorile'}</span></button>
             <button type="button" class="btn btn-cizgi btn-kucuk" id="paylas">${ikon('paylas')} Paylaş</button>
