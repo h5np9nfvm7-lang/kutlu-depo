@@ -58,8 +58,11 @@
     else if (data.session) await girisYapildi(data.session.user);
     else girisGoster();
   }
-  function sifreEkrani() {
-    history.replaceState(null, '', 'admin.html');
+  let sifreDegisimi = false;
+  $('#sifre-degistir').addEventListener('click', () => { sifreDegisimi = true; $('#sifre-vazgec').classList.remove('gizli'); sifreEkrani(true); });
+  $('#sifre-vazgec').addEventListener('click', () => { sifreDegisimi = false; $('#sifre-form').reset(); $('#sifre-yenile').classList.add('gizli'); $('#panel').classList.remove('gizli'); });
+  function sifreEkrani(paneldenMi) {
+    if (!paneldenMi) history.replaceState(null, '', 'admin.html');
     $('#yukleniyor').classList.add('gizli'); $('#panel').classList.add('gizli'); $('#giris').classList.add('gizli');
     $('#sifre-yenile').classList.remove('gizli'); $('#sifre-form [name=sifre1]').focus();
   }
@@ -75,6 +78,7 @@
     if (error) { hata.innerHTML = `<div class="form-mesaj hata">${esc(hataMetni(error))}</div>`; return; }
     f.reset(); $('#sifre-yenile').classList.add('gizli');
     BE.bildirim('Yeni şifreniz kaydedildi');
+    if (sifreDegisimi) { sifreDegisimi = false; $('#panel').classList.remove('gizli'); return; }
     await girisYapildi(data.user);
   });
   $('#unuttum').addEventListener('click', async () => {

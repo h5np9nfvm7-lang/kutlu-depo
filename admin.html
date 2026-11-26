@@ -10,8 +10,8 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=13">
-<link rel="stylesheet" href="css/admin.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/admin.css?v=14">
 </head>
 <body class="admin">
 
@@ -38,6 +38,7 @@
     <label class="alan"><span>Yeni şifre (tekrar)</span><input type="password" name="sifre2" autocomplete="new-password" minlength="8" required></label>
     <button class="btn btn-kirmizi btn-blok" type="submit">Şifreyi Kaydet</button>
     <div id="sifre-hata" aria-live="polite"></div>
+    <button type="button" id="sifre-vazgec" class="gizli" style="background:none;border:0;color:var(--metin-soluk);cursor:pointer;font:inherit;font-size:.9rem">← Vazgeç, panele dön</button>
   </form>
 </div>
 
@@ -59,6 +60,7 @@
     <div class="yan-alt">
       <a href="./" target="_blank" class="btn btn-kucuk btn-beyaz btn-blok">Siteyi Gör ↗</a>
       <small id="kullanici-eposta"></small>
+      <button type="button" class="btn btn-kucuk btn-cizgi btn-blok" id="sifre-degistir" style="color:#fff;border-color:#555">Şifremi Değiştir</button>
       <button type="button" class="btn btn-kucuk btn-kirmizi btn-blok" id="cikis">Çıkış Yap</button>
     </div>
   </aside>
@@ -322,11 +324,11 @@
   </div>
 </div>
 
-<script src="vendor/supabase.js?v=13"></script>
+<script src="vendor/supabase.js?v=14"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="js/config.js?v=13"></script>
-<script src="js/common.js?v=13"></script>
-<script src="js/hesap.js?v=13"></script>
-<script src="js/admin.js?v=13"></script>
+<script src="js/config.js?v=14"></script>
+<script src="js/common.js?v=14"></script>
+<script src="js/hesap.js?v=14"></script>
+<script src="js/admin.js?v=14"></script>
 </body>
 </html>
