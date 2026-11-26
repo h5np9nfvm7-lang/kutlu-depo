@@ -143,12 +143,25 @@
     let n = 0;
     const goster = (k) => {
       n = (k + resimler.length) % resimler.length;
-      $('#galeri-img').src = resimler[n]; $('#galeri-img').alt = `${i.baslik} - fotoğraf ${n + 1}`;
+      $('#galeri-img').src = resimler[n]; $('#galeri-img').alt = `${i.baslik} - fotoğraf ${n + 1}`; oranAyarla();
       $('#galeri-sayac').textContent = `${n + 1} / ${resimler.length}`;
       $$('.galeri-kucuk button').forEach((b) => b.classList.toggle('aktif', Number(b.dataset.n) === n));
       const tam = $('.tam-ekran img'); if (tam) tam.src = resimler[n];
     };
     $$('.galeri-kucuk button').forEach((b) => b.addEventListener('click', () => goster(Number(b.dataset.n))));
+    // Fotoğraf kırpılmadan ve siyah boşluk kalmadan sığsın: kutunun oranı fotoğrafın oranına uyar
+    // (yatay fotoğraflar tam, çok dikey olanlar en fazla kare olur, yanları bulanık arka planla dolar)
+    function oranAyarla() {
+      const im = $('#galeri-img'), kutu = $('#galeri-ana');
+      const uygula = () => {
+        if (!im.naturalWidth) return;
+        const o = Math.min(2, Math.max(1, im.naturalWidth / im.naturalHeight));
+        kutu.style.aspectRatio = String(o);
+        kutu.style.setProperty('--galeri-arka', `url("${im.currentSrc || im.src}")`);
+      };
+      if (im.complete) uygula(); else im.addEventListener('load', uygula, { once: true });
+    }
+    oranAyarla();
     const sol = $('.galeri-ok.sol'), sag = $('.galeri-ok.sag');
     sol && sol.addEventListener('click', (e) => { e.stopPropagation(); goster(n - 1); });
     sag && sag.addEventListener('click', (e) => { e.stopPropagation(); goster(n + 1); });
