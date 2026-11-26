@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=14';
+const SURUM = 'v=15';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [

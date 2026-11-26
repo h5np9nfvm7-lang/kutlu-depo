@@ -132,14 +132,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------- Hero ---------- */
 .hero {
   position: relative; color: #fff; padding: 90px 0 110px;
-  background:
-    linear-gradient(120deg, rgba(17,17,17,.92) 0%, rgba(17,17,17,.78) 55%, rgba(165,15,20,.85) 100%),
-    repeating-linear-gradient(45deg, #1b1b1b 0 2px, #151515 2px 14px);
+  background: #111 url('../images/kapak.svg') right bottom / cover no-repeat;
   overflow: hidden;
 }
-.hero::after {
-  content: ''; position: absolute; right: -80px; bottom: -80px; width: 380px; height: 380px;
-  border: 40px solid rgba(215,20,26,.25); border-radius: 50%;
+@media (max-width: 760px) {
+  /* Telefonda yazı şehrin üstüne biner; okunabilirlik için hafif karartma */
+  .hero { background: linear-gradient(rgba(13,13,13,.55), rgba(13,13,13,.55)), #111 url('../images/kapak.svg') 72% bottom / cover no-repeat; }
 }
 .hero h1 { color: #fff; max-width: 760px; }
 .hero p.alt { font-size: 1.15rem; color: #e6e6e6; max-width: 640px; margin-bottom: 34px; }
