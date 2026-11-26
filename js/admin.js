@@ -35,6 +35,9 @@
     if (/row-level security|permission denied/i.test(m)) return 'Yetki hatası: Bu hesap yönetici olarak tanımlı değil ya da SQL kurulum dosyası çalıştırılmamış.';
     if (/Failed to fetch|NetworkError/i.test(m)) return 'İnternet bağlantısı veya Supabase\'e ulaşılamıyor.';
     if (/Bucket not found/i.test(m)) return 'Fotoğraf deposu bulunamadı. SQL kurulum dosyasını çalıştırın.';
+    if (/rate limit|security purposes|after \d+ seconds/i.test(m)) return 'Çok sık deneme yapıldı. Birkaç dakika bekleyip tekrar deneyin.';
+    if (/should be different/i.test(m)) return 'Yeni şifre eskisiyle aynı olamaz.';
+    if (/Password should|weak/i.test(m)) return 'Şifre çok zayıf. Harf ve rakam karışık, en az 8 karakter kullanın.';
     return m;
   };
 
@@ -44,13 +47,48 @@
       $('#yukleniyor').innerHTML = '<div class="giris-kutu"><h2>Bağlantı kurulamadı</h2><p>Supabase kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin. Sorun devam ederse js/config.js içindeki adres ve anahtarı kontrol edin.</p></div>';
       return;
     }
+    let kurtarma = !!window.BE_SIFRE_KURTARMA;
+    db.auth.onAuthStateChange((olay) => {
+      if (olay === 'PASSWORD_RECOVERY') { kurtarma = true; sifreEkrani(); }
+      else if (olay === 'SIGNED_OUT') girisGoster();
+    });
     const { data } = await db.auth.getSession();
-    if (data.session) await girisYapildi(data.session.user);
+    if (kurtarma && data.session) sifreEkrani();
+    else if (kurtarma) { girisGoster(); $('#giris-hata').innerHTML = '<div class="form-mesaj hata">Şifre yenileme linkinin süresi dolmuş veya daha önce kullanılmış. "Şifremi unuttum" ile yeni link isteyin.</div>'; }
+    else if (data.session) await girisYapildi(data.session.user);
     else girisGoster();
-    db.auth.onAuthStateChange((olay) => { if (olay === 'SIGNED_OUT') girisGoster(); });
   }
+  function sifreEkrani() {
+    history.replaceState(null, '', 'admin.html');
+    $('#yukleniyor').classList.add('gizli'); $('#panel').classList.add('gizli'); $('#giris').classList.add('gizli');
+    $('#sifre-yenile').classList.remove('gizli'); $('#sifre-form [name=sifre1]').focus();
+  }
+  $('#sifre-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target, btn = $('button', f), hata = $('#sifre-hata');
+    hata.innerHTML = '';
+    if (f.sifre1.value.length < 8) { hata.innerHTML = '<div class="form-mesaj hata">Şifre en az 8 karakter olmalı.</div>'; return; }
+    if (f.sifre1.value !== f.sifre2.value) { hata.innerHTML = '<div class="form-mesaj hata">İki şifre aynı değil.</div>'; return; }
+    btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    const { data, error } = await db.auth.updateUser({ password: f.sifre1.value });
+    btn.disabled = false; btn.textContent = 'Şifreyi Kaydet';
+    if (error) { hata.innerHTML = `<div class="form-mesaj hata">${esc(hataMetni(error))}</div>`; return; }
+    f.reset(); $('#sifre-yenile').classList.add('gizli');
+    BE.bildirim('Yeni şifreniz kaydedildi');
+    await girisYapildi(data.user);
+  });
+  $('#unuttum').addEventListener('click', async () => {
+    const f = $('#giris-form'), eposta = f.eposta.value.trim(), kutu = $('#giris-hata');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(eposta)) { kutu.innerHTML = '<div class="form-mesaj hata">Önce yukarıya e-posta adresinizi yazın, sonra "Şifremi unuttum"a basın.</div>'; f.eposta.focus(); return; }
+    const b = $('#unuttum'); b.disabled = true;
+    const { error } = await db.auth.resetPasswordForEmail(eposta, { redirectTo: location.origin + '/admin.html' });
+    b.disabled = false;
+    kutu.innerHTML = error
+      ? `<div class="form-mesaj hata">Link gönderilemedi: ${esc(hataMetni(error))}</div>`
+      : `<div class="form-mesaj basarili">Şifre yenileme linki ${esc(eposta)} adresine gönderildi. E-postanızı açıp linke tıklayın (gelmezse "Gereksiz" klasörüne bakın).</div>`;
+  });
   function girisGoster() {
-    $('#yukleniyor').classList.add('gizli'); $('#panel').classList.add('gizli'); $('#giris').classList.remove('gizli');
+    $('#sifre-yenile').classList.add('gizli'); $('#yukleniyor').classList.add('gizli'); $('#panel').classList.add('gizli'); $('#giris').classList.remove('gizli');
     $('#giris-form [name=eposta]').focus();
   }
   $('#giris-form').addEventListener('submit', async (e) => {

@@ -2,6 +2,11 @@
    BİZİM EMLAK - ORTAK KODLAR (tüm sayfalarda kullanılır)
    Menü, alt bilgi, ilan kartı, favoriler, ayarlar vb.
    ========================================================== */
+// Şifre sıfırlama linki: her zaman yönetim paneline gider (şifre orada belirlenir)
+if (/type=recovery/.test(location.hash)) {
+  if (!/admin\.html$/.test(location.pathname)) location.replace('/admin.html' + location.hash);
+  else window.BE_SIFRE_KURTARMA = true;
+}
 (function () {
   'use strict';
   const C = window.BE_CONFIG;

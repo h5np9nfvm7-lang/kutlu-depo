@@ -10,8 +10,8 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=12">
-<link rel="stylesheet" href="css/admin.css?v=12">
+<link rel="stylesheet" href="css/style.css?v=13">
+<link rel="stylesheet" href="css/admin.css?v=13">
 </head>
 <body class="admin">
 
@@ -24,7 +24,20 @@
     <label class="alan"><span>Şifre</span><input type="password" name="sifre" autocomplete="current-password" required></label>
     <button class="btn btn-kirmizi btn-blok" type="submit">Giriş Yap</button>
     <div id="giris-hata" aria-live="polite"></div>
+    <button type="button" id="unuttum" style="background:none;border:0;color:var(--kirmizi);font-weight:600;cursor:pointer;font:inherit;font-size:.9rem">Şifremi unuttum</button>
     <a href="./" style="text-align:center;font-size:.9rem;color:var(--metin-soluk)">← Siteye dön</a>
+  </form>
+</div>
+
+<!-- YENİ ŞİFRE (e-postadaki linkle gelince) -->
+<div id="sifre-yenile" class="giris gizli">
+  <form class="giris-kutu" id="sifre-form" novalidate>
+    <img src="images/logo.png" alt="Bizim Emlak" style="max-width:220px;margin:0 auto 10px">
+    <h1 style="font-size:1.3rem;text-align:center">Yeni Şifre Belirleyin</h1>
+    <label class="alan"><span>Yeni şifre (en az 8 karakter)</span><input type="password" name="sifre1" autocomplete="new-password" minlength="8" required></label>
+    <label class="alan"><span>Yeni şifre (tekrar)</span><input type="password" name="sifre2" autocomplete="new-password" minlength="8" required></label>
+    <button class="btn btn-kirmizi btn-blok" type="submit">Şifreyi Kaydet</button>
+    <div id="sifre-hata" aria-live="polite"></div>
   </form>
 </div>
 
@@ -309,11 +322,11 @@
   </div>
 </div>
 
-<script src="vendor/supabase.js?v=12"></script>
+<script src="vendor/supabase.js?v=13"></script>
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="js/config.js?v=12"></script>
-<script src="js/common.js?v=12"></script>
-<script src="js/hesap.js?v=12"></script>
-<script src="js/admin.js?v=12"></script>
+<script src="js/config.js?v=13"></script>
+<script src="js/common.js?v=13"></script>
+<script src="js/hesap.js?v=13"></script>
+<script src="js/admin.js?v=13"></script>
 </body>
 </html>
