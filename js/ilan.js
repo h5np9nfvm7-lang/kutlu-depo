@@ -62,6 +62,15 @@
   const aramaTel = (dn && dn.telefon) || a.telefon;
   const wpNo = dn && dn.telefon ? (dn.whatsapp ? dn.telefon : '') : a.whatsapp;
   const wpMesaj = `Merhaba, ${i.id} numaralı "${i.baslik}" ilanı hakkında bilgi almak istiyorum. ${location.href}`;
+  // Ekranın kenarındaki sabit WhatsApp / Ara butonları da bu ilanda danışmana gitsin
+  if (dn && dn.telefon) {
+    const sabitWp = document.querySelector('.wp-sabit'), sabitTel = document.querySelector('.tel-sabit');
+    if (sabitTel) sabitTel.href = BE.telLink(dn.telefon);
+    if (sabitWp) { if (wpNo) sabitWp.href = BE.wpLink(wpNo, wpMesaj); else sabitWp.remove(); }
+  } else {
+    const sabitWp = document.querySelector('.wp-sabit');
+    if (sabitWp && a.whatsapp) sabitWp.href = BE.wpLink(a.whatsapp, wpMesaj);
+  }
   const fav = BE.favoriMi(i.id);
 
   alan.innerHTML = `
