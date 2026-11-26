@@ -11,9 +11,7 @@
 <link rel="canonical" href="https://bizimemlak.biz/iletisim.html">
 <meta property="og:url" content="https://bizimemlak.biz/iletisim.html">
 <link rel="icon" href="images/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 <header id="site-ust"></header>
@@ -50,9 +48,6 @@
         <h2>Bize Yazın</h2>
         <form id="iletisim-form" novalidate>
           <div class="form-izgara">
-            <label class="alan"><span>Adınız Soyadınız *</span><input type="text" name="ad" required maxlength="100" autocomplete="name"></label>
-            <label class="alan"><span>Telefon *</span><input type="tel" name="tel" required maxlength="30" autocomplete="tel" placeholder="05xx xxx xx xx"></label>
-            <label class="alan"><span>E-posta</span><input type="email" name="eposta" maxlength="120" autocomplete="email"></label>
             <label class="alan"><span>Konu</span>
               <select name="konu">
                 <option>Ev almak istiyorum</option><option>Ev satmak istiyorum</option>
@@ -62,10 +57,10 @@
             </label>
             <label class="alan tam"><span>Mesajınız *</span><textarea name="mesaj" required maxlength="3000"></textarea></label>
           </div>
-          <div class="kvkk-yer"></div>
+          <p class="form-not">Bu form sitemizde hiçbir bilgi saklamaz. Butona bastığınızda mesajınız WhatsApp'ta hazır açılır, siz gönderirsiniz.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-            <button type="submit" class="btn btn-kirmizi">Mesajı Gönder</button>
-            <button type="button" class="btn btn-wp gizli" data-wp-form="iletisim-form">WhatsApp ile Gönder</button>
+            <button type="submit" class="btn btn-wp">WhatsApp ile Gönder</button>
+            <a class="btn btn-cizgi tel-btn" href="#">Bizi Arayın</a>
           </div>
           <div class="sonuc" aria-live="polite"></div>
         </form>
@@ -76,8 +71,6 @@
         <p style="color:var(--metin-soluk)">Satmak veya kiraya vermek istediğiniz mülkün bilgilerini bırakın, ücretsiz değerleme için sizi arayalım.</p>
         <form id="mulk-form" novalidate>
           <div class="form-izgara">
-            <label class="alan"><span>Adınız Soyadınız *</span><input type="text" name="ad" required maxlength="100" autocomplete="name"></label>
-            <label class="alan"><span>Telefon *</span><input type="tel" name="tel" required maxlength="30" autocomplete="tel"></label>
             <label class="alan"><span>İşlem</span><select name="islem"><option>Satmak istiyorum</option><option>Kiraya vermek istiyorum</option></select></label>
             <label class="alan"><span>Mülk Tipi</span><select name="tip"><option>Daire</option><option>Villa</option><option>Müstakil Ev</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option><option>Diğer</option></select></label>
             <label class="alan"><span>İlçe / Mahalle</span><input type="text" name="konum" maxlength="100"></label>
@@ -86,10 +79,10 @@
             <label class="alan"><span>Beklediğiniz Fiyat (TL)</span><input type="text" name="fiyat" maxlength="30" inputmode="numeric"></label>
             <label class="alan tam"><span>Eklemek istedikleriniz</span><textarea name="not" maxlength="1500" style="min-height:80px"></textarea></label>
           </div>
-          <div class="kvkk-yer"></div>
+          <p class="form-not">Bu form sitemizde hiçbir bilgi saklamaz. Butona bastığınızda mesajınız WhatsApp'ta hazır açılır, siz gönderirsiniz.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-            <button type="submit" class="btn btn-siyah">Değerleme İste</button>
-            <button type="button" class="btn btn-wp gizli" data-wp-form="mulk-form">WhatsApp ile Gönder</button>
+            <button type="submit" class="btn btn-wp">WhatsApp ile Gönder</button>
+            <a class="btn btn-cizgi tel-btn" href="#">Bizi Arayın</a>
           </div>
           <div class="sonuc" aria-live="polite"></div>
         </form>
@@ -111,8 +104,6 @@
       <div class="kart-blok" style="margin:0">
         <form id="talep-form" novalidate>
           <div class="form-izgara">
-            <label class="alan"><span>Adınız Soyadınız *</span><input type="text" name="ad" required maxlength="100" autocomplete="name"></label>
-            <label class="alan"><span>Telefon *</span><input type="tel" name="tel" required maxlength="30" autocomplete="tel"></label>
             <label class="alan"><span>Ne arıyorsunuz?</span><select name="islem"><option>Satılık</option><option>Kiralık</option></select></label>
             <label class="alan"><span>Mülk Tipi</span><select name="tip"><option>Daire</option><option>Müstakil Ev</option><option>Villa</option><option>Arsa</option><option>Dükkan</option><option>Ofis</option><option>Fark etmez</option></select></label>
             <label class="alan"><span>İlçe / Mahalle</span><input type="text" name="konum" maxlength="100" placeholder="Örn. Merkez, Fakıuşağı"></label>
@@ -120,10 +111,10 @@
             <label class="alan tam"><span>En Fazla Bütçe (TL)</span><input type="text" name="fiyat" maxlength="30" inputmode="numeric"></label>
             <label class="alan tam"><span>Diğer istekleriniz</span><textarea name="not" maxlength="1500" style="min-height:80px" placeholder="Örn. asansörlü, okula yakın, krediye uygun"></textarea></label>
           </div>
-          <div class="kvkk-yer"></div>
+          <p class="form-not">Bu form sitemizde hiçbir bilgi saklamaz. Butona bastığınızda mesajınız WhatsApp'ta hazır açılır, siz gönderirsiniz.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-            <button type="submit" class="btn btn-kirmizi">Talebimi Gönder</button>
-            <button type="button" class="btn btn-wp gizli" data-wp-form="talep-form">WhatsApp ile Gönder</button>
+            <button type="submit" class="btn btn-wp">WhatsApp ile Gönder</button>
+            <a class="btn btn-cizgi tel-btn" href="#">Bizi Arayın</a>
           </div>
           <div class="sonuc" aria-live="polite"></div>
         </form>
@@ -134,10 +125,10 @@
 
 <footer id="site-alt"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=10"></script>
-<script src="js/common.js?v=10"></script>
-<script src="js/hesap.js?v=10"></script>
-<script src="js/iletisim.js?v=10"></script>
+<script src="vendor/supabase.js?v=11"></script>
+<script src="js/config.js?v=11"></script>
+<script src="js/common.js?v=11"></script>
+<script src="js/hesap.js?v=11"></script>
+<script src="js/iletisim.js?v=11"></script>
 </body>
 </html>

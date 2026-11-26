@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=10';
+const SURUM = 'v=11';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -245,8 +245,6 @@ const BAS = (o) => `<!DOCTYPE html>
 <meta property="og:image" content="${esc(o.resim || SITE + '/images/logo.png')}">
 <meta name="theme-color" content="#111111">
 <link rel="icon" href="images/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?${SURUM}">
 ${(o.ld || []).map((x) => `<script type="application/ld+json">${JSON.stringify(x).replace(/</g, '\\u003c')}</script>`).join('\n')}
 </head>
@@ -257,7 +255,7 @@ ${(o.ld || []).map((x) => `<script type="application/ld+json">${JSON.stringify(x
 const SON = (betikler) => `
 <footer id="site-alt"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vendor/supabase.js?v=11"></script>
 <script src="js/config.js?${SURUM}"></script>
 <script src="js/common.js?${SURUM}"></script>
 ${betikler}

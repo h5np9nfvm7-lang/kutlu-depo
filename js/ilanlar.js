@@ -171,7 +171,7 @@
   let harita = null, katman = null, leafletSozu = null;
   const leafletYukle = () => leafletSozu || (leafletSozu = new Promise((coz, red) => {
     if (window.L) return coz();
-    const sc = document.createElement('script'); sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    const sc = document.createElement('script'); sc.src = 'vendor/leaflet/leaflet.js';
     sc.onload = coz; sc.onerror = red; document.head.appendChild(sc);
   }));
   async function haritaCiz(liste) {

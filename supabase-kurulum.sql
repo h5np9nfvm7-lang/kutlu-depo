@@ -320,3 +320,10 @@ select * from (values
 where not exists (select 1 from public.ilanlar);
 
 -- Bitti! "Success. No rows returned" yazısı her şeyin yolunda olduğunu gösterir.
+
+-- ===========================================================
+-- KVKK: Site artık form ile kişisel veri toplamıyor (mesajlar WhatsApp'tan gelir).
+-- Ziyaretçilerin mesajlar tablosuna kayıt eklemesi kapatılır.
+-- Panelde eski mesajları görmeye ve silmeye devam edebilirsiniz.
+-- ===========================================================
+drop policy if exists "mesaj gonderme" on public.mesajlar;

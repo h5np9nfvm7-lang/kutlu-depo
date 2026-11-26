@@ -51,7 +51,7 @@
   const guvenliLink = (u) => /^https:\/\//i.test(String(u || '')) ? u : null;
   const video = guvenliLink(i.video_url), tur = guvenliLink(i.sanal_tur_url), yt = ytId(video);
   const medyaHtml = (video || tur) ? `<div class="kart-blok"><h2>Video ve Sanal Tur</h2>
-    ${yt ? `<div class="video-kutu"><iframe src="https://www.youtube-nocookie.com/embed/${yt}" title="İlan videosu" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>` : ''}
+    ${yt ? `<div class="video-kutu" data-gec="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1" data-baslik="İlan videosu"><button type="button" class="harita-ac koyu">${ikon('oynat')}<strong>Videoyu oynat</strong><span>Tıklayınca YouTube yüklenir</span></button></div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:${yt ? '14px' : '0'}">
       ${video && !yt ? `<a class="btn btn-siyah" href="${esc(video)}" target="_blank" rel="noopener">▶ Videoyu İzle</a>` : ''}
       ${tur ? `<a class="btn btn-kirmizi" href="${esc(tur)}" target="_blank" rel="noopener">360° Sanal Turu Başlat</a>` : ''}
@@ -99,8 +99,7 @@
       ${(i.ozellikler || []).length ? `<div class="kart-blok"><h2>Özellikler</h2><ul class="ozellik-liste">${i.ozellikler.map((o) => `<li>${ikon('tik')} ${esc(o)}</li>`).join('')}</ul></div>` : ''}
 
       ${i.enlem && i.boylam ? `<div class="kart-blok"><h2>Konum</h2>
-        <div class="harita-kutu"><iframe title="İlan konumu haritası" loading="lazy"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=${i.boylam - 0.02}%2C${i.enlem - 0.012}%2C${i.boylam + 0.02}%2C${i.enlem + 0.012}&layer=mapnik&marker=${i.enlem}%2C${i.boylam}"></iframe></div>
+        <div class="harita-kutu" data-gec="https://www.openstreetmap.org/export/embed.html?bbox=${i.boylam - 0.02}%2C${i.enlem - 0.012}%2C${i.boylam + 0.02}%2C${i.enlem + 0.012}&amp;layer=mapnik&amp;marker=${i.enlem}%2C${i.boylam}" data-baslik="İlan konumu haritası"><button type="button" class="harita-ac">${ikon('konum')}<strong>Haritayı göster</strong><span>Tıklayınca OpenStreetMap haritası yüklenir</span></button></div>
         <p style="margin:10px 0 0;font-size:.9rem"><a class="btn btn-cizgi btn-kucuk" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${i.enlem},${i.boylam}">${ikon('harita')} Google Haritalar'da Aç / Yol Tarifi</a></p>
         <p style="font-size:.82rem;color:var(--metin-soluk);margin:8px 0 0">Harita konumu yaklaşık olarak gösterilmektedir.</p></div>` : ''}
 
@@ -121,17 +120,6 @@
             <button type="button" class="btn btn-cizgi btn-kucuk" onclick="window.print()" aria-label="Yazdır">${ikon('yazdir')}</button>
           </div>
         </div>
-        <form id="ilan-form" style="margin-top:20px;border-top:1px solid var(--kenarlik);padding-top:16px" novalidate>
-          <strong style="font-family:var(--font-baslik);display:block;margin-bottom:10px">Sizi Arayalım</strong>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <input type="text" name="ad" placeholder="Adınız Soyadınız" aria-label="Adınız Soyadınız" required maxlength="100">
-            <input type="tel" name="tel" placeholder="Telefon numaranız" aria-label="Telefon" required maxlength="30">
-            <textarea name="mesaj" rows="3" style="min-height:80px" aria-label="Mesaj" maxlength="1000">${BE.aktifMi(i) ? 'Bu ilan hakkında bilgi almak istiyorum.' : 'Bu ilana benzer bir ilan arıyorum.'}</textarea>
-            ${BE.kvkkOnay()}
-            <button type="submit" class="btn btn-siyah btn-blok">Gönder</button>
-          </div>
-          <div id="ilan-form-sonuc" aria-live="polite"></div>
-        </form>
       </div>
     </aside>
   </div>`;
@@ -185,24 +173,12 @@
     catch { BE.bildirim('Linki adres çubuğundan kopyalayabilirsiniz'); }
   });
 
-  // Sizi arayalım formu
-  $('#ilan-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const f = e.target, sonuc = $('#ilan-form-sonuc');
-    const ad = f.ad.value.trim(), tel = f.tel.value.trim();
-    if (ad.length < 2 || tel.replace(/\D/g, '').length < 10) { sonuc.innerHTML = '<div class="form-mesaj hata">Lütfen adınızı ve geçerli bir telefon numarası yazın.</div>'; return; }
-    if (!BE.kvkkKontrol(f)) { sonuc.innerHTML = '<div class="form-mesaj hata">Lütfen aydınlatma metnini okuduğunuzu onaylayın.</div>'; return; }
-    const btn = $('button[type=submit]', f); btn.disabled = true; btn.textContent = 'Gönderiliyor…';
-    try {
-      const { error } = await BE.db.from('mesajlar').insert({ tur: 'İlan Talebi', ad_soyad: ad, telefon: tel, konu: `#${i.id} ${i.baslik}`.slice(0, 120), mesaj: f.mesaj.value.trim().slice(0, 3000), ilan_id: i.id });
-      if (error) throw error;
-      f.reset(); sonuc.innerHTML = '<div class="form-mesaj basarili">Teşekkürler! En kısa sürede sizi arayacağız.</div>';
-    } catch (err) {
-      console.error(err);
-      sonuc.innerHTML = `<div class="form-mesaj hata">Gönderilemedi. Lütfen bizi arayın${a.telefon ? ': ' + esc(a.telefon) : ''}.</div>`;
-    }
-    btn.disabled = false; btn.textContent = 'Gönder';
-  });
+  // Harita ve video yalnızca ziyaretçi tıklayınca yüklenir (dış siteye bağlantı sayfa açılırken kurulmaz)
+  $$('[data-gec]').forEach((k) => $('button', k).addEventListener('click', () => {
+    const fr = document.createElement('iframe');
+    fr.src = k.dataset.gec; fr.title = k.dataset.baslik || ''; fr.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; fr.allowFullscreen = true;
+    k.innerHTML = ''; k.appendChild(fr);
+  }));
 
   // Benzer ilanlar
   try {

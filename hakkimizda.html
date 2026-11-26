@@ -11,9 +11,7 @@
 <link rel="canonical" href="https://bizimemlak.biz/hakkimizda.html">
 <meta property="og:url" content="https://bizimemlak.biz/hakkimizda.html">
 <link rel="icon" href="images/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 <header id="site-ust"></header>
@@ -83,9 +81,9 @@
 
 <footer id="site-alt"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js?v=10"></script>
-<script src="js/common.js?v=10"></script>
+<script src="vendor/supabase.js?v=11"></script>
+<script src="js/config.js?v=11"></script>
+<script src="js/common.js?v=11"></script>
 <script>
   BE.sayfaBaslat('hakkimizda.html').then((a) => {
     const k = (l, ik) => (l || []).map((x, i) => `<div class="kutu belir"><div class="kutu-ikon">${BE.ikon(ik[i % ik.length])}</div><h3>${BE.esc(x.baslik)}</h3><p>${BE.esc(x.aciklama)}</p></div>`).join('');

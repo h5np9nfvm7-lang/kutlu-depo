@@ -20,81 +20,45 @@
   $('#acik-durum').innerHTML = `<span class="acik-durum ${acik ? 'acik' : 'kapali'}" style="font-size:.8rem;vertical-align:middle;margin-left:8px">${acik ? 'Şu an açık' : 'Şu an kapalı'}</span>`;
   $('#saat-notu').textContent = a.calisma_notu || '';
 
-  // Harita
+  // Harita (ziyaretçi tıklayınca yüklenir; sayfa açılırken Google'a bağlanılmaz)
   if (a.harita_arama || a.adres) {
     const q = encodeURIComponent(a.harita_arama || a.adres);
-    $('#ofis-harita').innerHTML = `<iframe title="Ofis konumu" loading="lazy" style="height:100%;min-height:360px" src="https://maps.google.com/maps?q=${q}&z=16&output=embed"></iframe>`;
+    const kutu = $('#ofis-harita');
+    kutu.innerHTML = `<button type="button" class="harita-ac">${ikon('konum')}<strong>Haritayı göster</strong><span>Tıklayınca Google Haritalar yüklenir</span></button>`;
+    $('.harita-ac', kutu).addEventListener('click', () => {
+      kutu.innerHTML = `<iframe title="Ofis konumu" style="height:100%;min-height:360px" src="https://maps.google.com/maps?q=${q}&z=16&output=embed"></iframe>`;
+    });
   }
 
-  // Formlar
-  const telOk = (t) => t.replace(/\D/g, '').length >= 10;
-  const iletisimMesaji = (f) => ({
-    tur: 'İletişim', ad_soyad: f.ad.value.trim(), telefon: f.tel.value.trim(), eposta: f.eposta.value.trim() || null,
-    konu: f.konu.value, mesaj: f.mesaj.value.trim()
-  });
-  const mulkMesaji = (f) => ({
-    tur: 'Mülk Teklifi', ad_soyad: f.ad.value.trim(), telefon: f.tel.value.trim(),
-    konu: `${f.islem.value} - ${f.tip.value}`,
-    mesaj: [
-      `İşlem: ${f.islem.value}`, `Mülk tipi: ${f.tip.value}`, f.konum.value && `Konum: ${f.konum.value}`,
-      f.m2.value && `Metrekare: ${f.m2.value}`, f.oda.value && `Oda: ${f.oda.value}`,
-      f.fiyat.value && `Beklenen fiyat: ${f.fiyat.value} TL`, f.not.value && `Not: ${f.not.value}`
-    ].filter(Boolean).join('\n')
-  });
-  const talepMesaji = (f) => ({
-    tur: 'Ev Talebi', ad_soyad: f.ad.value.trim(), telefon: f.tel.value.trim(),
-    konu: `${f.islem.value} ${f.tip.value} arıyor`,
-    mesaj: [
-      `Aranan: ${f.islem.value} ${f.tip.value}`, f.konum.value && `Konum: ${f.konum.value}`,
-      f.oda.value && `Oda: ${f.oda.value}`, f.fiyat.value && `En fazla bütçe: ${f.fiyat.value} TL`, f.not.value && `Not: ${f.not.value}`
-    ].filter(Boolean).join('\n')
-  });
-  const kontrol = (f, gerekMesaj) => {
-    if (f.ad.value.trim().length < 2) return 'Lütfen adınızı yazın.';
-    if (!telOk(f.tel.value)) return 'Lütfen geçerli bir telefon numarası yazın.';
-    if (gerekMesaj && f.mesaj.value.trim().length < 3) return 'Lütfen mesajınızı yazın.';
-    if (!BE.kvkkKontrol(f)) return 'Lütfen aydınlatma metnini okuduğunuzu onaylayın.';
-    return '';
-  };
-  $$('.kvkk-yer').forEach((e) => { e.innerHTML = BE.kvkkOnay(); });
+  // Formlar: hiçbir bilgi sitede saklanmaz, mesaj WhatsApp'ta hazır açılır.
+  const iletisimMesaji = (f) => [`Konu: ${f.konu.value}`, f.mesaj.value.trim()];
+  const mulkMesaji = (f) => [
+    `${f.islem.value}: ${f.tip.value}`, f.konum.value && `Konum: ${f.konum.value}`,
+    f.m2.value && `Metrekare: ${f.m2.value}`, f.oda.value && `Oda: ${f.oda.value}`,
+    f.fiyat.value && `Beklediğim fiyat: ${f.fiyat.value} TL`, f.not.value && `Not: ${f.not.value}`
+  ];
+  const talepMesaji = (f) => [
+    `Aradığım: ${f.islem.value} ${f.tip.value}`, f.konum.value && `Konum: ${f.konum.value}`,
+    f.oda.value && `Oda: ${f.oda.value}`, f.fiyat.value && `En fazla bütçe: ${f.fiyat.value} TL`, f.not.value && `Not: ${f.not.value}`
+  ];
   const yl = $('#yorum-link'); if (yl) yl.href = BE.yorumLink(a);
+  $$('.tel-btn').forEach((b) => { if (a.telefon) { b.href = BE.telLink(a.telefon); b.textContent = 'Arayın: ' + a.telefon; } else b.remove(); });
 
-  function bagla(formId, olustur, gerekMesaj) {
+  function bagla(formId, olustur, giris, gerekMesaj) {
     const f = $('#' + formId), sonuc = $('.sonuc', f);
     if (f.fiyat) window.BE_HESAP.bicimle(f.fiyat);
-    f.addEventListener('submit', async (e) => {
+    if (!a.whatsapp) { const b = $('button[type=submit]', f); b.disabled = true; b.textContent = 'WhatsApp numarası ayarlanmamış'; }
+    f.addEventListener('submit', (e) => {
       e.preventDefault();
-      const hata = kontrol(f, gerekMesaj);
-      if (hata) { sonuc.innerHTML = `<div class="form-mesaj hata">${hata}</div>`; return; }
-      const btn = $('button[type=submit]', f); const eski = btn.textContent; btn.disabled = true; btn.textContent = 'Gönderiliyor…';
-      try {
-        if (!BE.db) throw new Error('bağlantı yok');
-        const { error } = await BE.db.from('mesajlar').insert(olustur(f));
-        if (error) throw error;
-        f.reset();
-        sonuc.innerHTML = '<div class="form-mesaj basarili">Teşekkürler! Mesajınız bize ulaştı, en kısa sürede dönüş yapacağız.</div>';
-      } catch (err) {
-        console.error(err);
-        sonuc.innerHTML = `<div class="form-mesaj hata">Mesaj gönderilemedi. ${a.whatsapp ? 'WhatsApp ile gönderebilir veya ' : ''}bizi arayabilirsiniz${a.telefon ? ': ' + esc(a.telefon) : ''}.</div>`;
-      }
-      btn.disabled = false; btn.textContent = eski;
+      if (gerekMesaj && f.mesaj.value.trim().length < 3) { sonuc.innerHTML = '<div class="form-mesaj hata">Lütfen mesajınızı yazın.</div>'; return; }
+      sonuc.innerHTML = '';
+      const metin = [giris, ...olustur(f)].filter(Boolean).join('\n');
+      window.open(BE.wpLink(a.whatsapp, metin), '_blank', 'noopener');
     });
-    // WhatsApp ile gönder
-    const wp = $(`[data-wp-form="${formId}"]`);
-    if (a.whatsapp && wp) {
-      wp.classList.remove('gizli');
-      wp.addEventListener('click', () => {
-        const hata = kontrol(f, gerekMesaj);
-        if (hata) { sonuc.innerHTML = `<div class="form-mesaj hata">${hata}</div>`; return; }
-        const m = olustur(f);
-        const metin = `Merhaba, ben ${m.ad_soyad} (${m.telefon}).\nKonu: ${m.konu}\n${m.mesaj}`;
-        window.open(BE.wpLink(a.whatsapp, metin), '_blank', 'noopener');
-      });
-    }
   }
-  bagla('iletisim-form', iletisimMesaji, true);
-  bagla('mulk-form', mulkMesaji, false);
-  bagla('talep-form', talepMesaji, false);
+  bagla('iletisim-form', iletisimMesaji, 'Merhaba,', true);
+  bagla('mulk-form', mulkMesaji, 'Merhaba, mülkümü size vermek istiyorum.', false);
+  bagla('talep-form', talepMesaji, 'Merhaba, ev arıyorum. Uygun ilan olursa haber verir misiniz?', false);
 
   // Form başka sayfadan çağrıldıysa
   const p = BE.param('konu');
