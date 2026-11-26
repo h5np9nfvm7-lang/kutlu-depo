@@ -9,7 +9,15 @@
   // Yeni eklenen bir ilanın sayfası henüz üretilmediyse ilan detayına yönlendir
   (function () {
     var m = location.pathname.match(/ilan-(\d+)(?:-[^/]*)?(?:\.html)?$/);
-    if (m) location.replace('/ilan.html?id=' + m[1]);
+    if (m) { location.replace('/ilan.html?id=' + m[1]); return; }
+    // Eski sitenin (.php) adreslerini yeni sayfalara yönlendir
+    var p = location.pathname.toLowerCase();
+    if (/\.(php|asp|aspx)$/.test(p)) {
+      if (/arama|ilan|emlak|liste|detay|portfoy/.test(p)) location.replace('/ilanlar.html');
+      else if (/iletisim|contact/.test(p)) location.replace('/iletisim.html');
+      else if (/hakkimizda|about|kurumsal/.test(p)) location.replace('/hakkimizda.html');
+      else location.replace('/');
+    }
   })();
 </script>
 <link rel="icon" href="/images/favicon.png">
