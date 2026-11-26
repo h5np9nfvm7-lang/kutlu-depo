@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=24';
+const SURUM = 'v=25';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -326,7 +326,7 @@ function ilanSayfasi(i, ayar) {
       ${(() => { const d = (ayar.danismanlar || []).find((x) => x.id && x.id === i.danisman_id); const t = (d && d.telefon) || ayar.telefon || ''; const tl = (n) => 'tel:' + String(n).replace(/[^\d+]/g, '').replace(/^0/, '+90');
         const shMi = (u) => /^https:\/\/([a-z0-9-]+\.)*sahibinden\.com(\/|$)/i.test(String(u || ''));
         const sh = shMi(ayar.sahibinden_magaza) ? ayar.sahibinden_magaza : '';
-        return `<p>${d ? `İlan danışmanı: <strong>${esc(d.ad)}</strong>${d.unvan ? ' (' + esc(d.unvan) + ')' : ''}<br>` : ''}Bilgi ve gösterim için: <a href="${tl(t)}">${esc(t)}</a>${sh ? `<br><a href="${esc(sh)}" target="_blank" rel="noopener">Sahibinden'deki tüm ilanlarımız</a>` : ''}</p>`; })()}
+        return `<p>${d ? `İlan danışmanı: <strong>${esc(d.ad)}</strong>${d.unvan ? ' (' + esc(d.unvan) + ')' : ''}<br>` : ''}Bilgi ve gösterim için: <a href="${tl(t)}">${esc(t)}</a>${sh ? `<br><a href="${esc(sh)}" target="_blank" rel="noopener">sahibinden.com tüm ilanlarımız</a>` : ''}</p>`; })()}
     </div>
   </section>
   <section class="bolum bolum-gri gizli" id="benzer-bolum">
