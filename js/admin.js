@@ -319,13 +319,13 @@
     if ($('#filigran').checked) {
       try {
         const logo = await logoYukle();
-        const lw = Math.round(c.width * 0.22), lh = Math.round(lw * logo.height / logo.width), pay = Math.round(c.width * 0.025);
-        x.globalAlpha = 0.85;
-        x.fillStyle = 'rgba(255,255,255,0.75)';
-        const r = Math.round(lh * 0.12);
-        x.beginPath(); x.roundRect ? x.roundRect(c.width - lw - pay * 1.6, c.height - lh - pay * 1.6, lw + pay * 1.2, lh + pay * 1.2, r) : x.rect(c.width - lw - pay * 1.6, c.height - lh - pay * 1.6, lw + pay * 1.2, lh + pay * 1.2); x.fill();
-        x.globalAlpha = 1;
+        // Arka plansız, küçük logo (fotoğrafın %14'ü); koyu zeminde de seçilsin diye hafif gölge
+        const lw = Math.round(c.width * 0.14), lh = Math.round(lw * logo.height / logo.width), pay = Math.round(c.width * 0.02);
+        x.save();
+        x.globalAlpha = 0.9;
+        x.shadowColor = 'rgba(255,255,255,0.55)'; x.shadowBlur = Math.max(2, Math.round(lw * 0.03));
         x.drawImage(logo, c.width - lw - pay, c.height - lh - pay, lw, lh);
+        x.restore();
       } catch (e) { console.warn('Logo eklenemedi', e); }
     }
     let blob = await new Promise((coz) => c.toBlob(coz, 'image/webp', 0.82));

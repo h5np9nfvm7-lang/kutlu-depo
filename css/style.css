@@ -313,7 +313,7 @@ textarea { resize: vertical; min-height: 110px; }
 .detay-duzen { display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start; }
 @media (max-width: 960px) { .detay-duzen { grid-template-columns: 1fr; } }
 .galeri-ana { position: relative; aspect-ratio: 16/10; background: var(--siyah); border-radius: var(--yuvarlak); overflow: hidden; cursor: zoom-in; }
-.galeri-ana img { width: 100%; height: 100%; object-fit: contain; }
+.galeri-ana img { width: 100%; height: 100%; object-fit: cover; } /* Fotoğraf kutuyu tam doldurur; tamamı büyütünce görünür */
 .galeri-ok { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
 .galeri-ok.sol { left: 12px; } .galeri-ok.sag { right: 12px; }
 .galeri-sayac { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,.7); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: .85rem; }
