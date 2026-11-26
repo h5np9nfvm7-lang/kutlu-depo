@@ -487,7 +487,6 @@
     let sonYetki = ''; try { sonYetki = localStorage.getItem('be_yetki_no') || ''; } catch (e) {}
     form.yetki_no.value = i ? (i.yetki_no || '') : sonYetki;
     form.sanal_tur_url.value = (i && i.sanal_tur_url) || '';
-    form.sahibinden_url.value = (i && i.sahibinden_url) || '';
     form.enlem.value = i && i.enlem != null ? i.enlem : '';
     form.boylam.value = i && i.boylam != null ? i.boylam : '';
     fotolar = i ? [...(i.resimler || [])] : [];
@@ -511,14 +510,13 @@
     v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire'; v.durum = v.durum || 'Aktif';
     v.resimler = fotolar; v.ozellikler = etiketler;
     v.danisman_id = form.danisman_id.value || null;
-    ['video_url', 'sanal_tur_url', 'yetki_no', 'sahibinden_url'].forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
+    ['video_url', 'sanal_tur_url', 'yetki_no'].forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
 
     const hatalar = [];
     if (!v.baslik || v.baslik.length < 3) hatalar.push('başlık');
     if (v.fiyat === null) hatalar.push('fiyat');
     if (!v.yetki_no) hatalar.push('yetki belge no');
     if ((v.video_url && !/^https:\/\//i.test(v.video_url)) || (v.sanal_tur_url && !/^https:\/\//i.test(v.sanal_tur_url))) hatalar.push('video/sanal tur linki "https://" ile başlamalı');
-    if (v.sahibinden_url && !/^https:\/\/([a-z0-9-]+\.)*sahibinden\.com(\/|$)/i.test(v.sahibinden_url)) hatalar.push('sahibinden linki "https://www.sahibinden.com/..." şeklinde olmalı');
     if (hatalar.length) {
       $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Lütfen doldurun: ${hatalar.join(', ')}</span>`;
       (!v.baslik ? form.baslik : v.fiyat === null ? form.fiyat : form.yetki_no).focus(); return;
