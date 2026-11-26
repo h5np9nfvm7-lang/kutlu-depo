@@ -26,6 +26,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Kütüphaneleri siteye kopyala (yoksa)
+        # Ziyaretçinin tarayıcısı dış sunuculara (CDN) bağlanmasın diye
+        # kütüphaneler bir kez indirilip sitenin içinde saklanır.
+        run: |
+          mkdir -p vendor/leaflet/images
+          [ -s vendor/supabase.js ] || curl -fsSL https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js -o vendor/supabase.js
+          for f in leaflet.js leaflet.css images/marker-icon.png images/marker-icon-2x.png images/marker-shadow.png images/layers.png images/layers-2x.png; do
+            [ -s "vendor/leaflet/$f" ] || curl -fsSL "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/$f" -o "vendor/leaflet/$f"
+          done
       - name: Sayfaları üret
         run: node scripts/olustur.mjs
       - name: Değişiklik varsa kaydet
