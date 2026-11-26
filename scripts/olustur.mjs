@@ -92,6 +92,128 @@ const SAYFALAR = [
   }
 ];
 
+/* ---------- Ek arama sayfaları (ilçe, özellik, oda) ----------
+   Çekirdek 7 sayfa her zaman yayında. Ek sayfalar yalnızca o aramaya uyan
+   aktif ilan varsa Google'a açılır (sitemap + index); ilan yoksa "noindex"
+   ile üretilir, böylece boş/ince sayfa cezası riski olmaz. */
+const ILCELER = [
+  ['Merkez', 'osmaniye-merkez', 'Osmaniye Merkez'], ['Kadirli', 'kadirli', 'Kadirli'], ['Düziçi', 'duzici', 'Düziçi'],
+  ['Bahçe', 'bahce', 'Bahçe'], ['Toprakkale', 'toprakkale', 'Toprakkale'], ['Hasanbeyli', 'hasanbeyli', 'Hasanbeyli'], ['Sumbas', 'sumbas', 'Sumbas']
+];
+const KONUT = ['Daire', 'Müstakil Ev', 'Villa'];
+const ilceSss = (ad) => [
+  [`${ad}'de ilan bulamazsam ne yapmalıyım?`, `Aradığınız özellikleri "Aradığım Evi Bildir" formuyla bize iletin; ${ad} için uygun ilan geldiğinde sizi arayalım.`],
+  ['Gösterim için ücret alıyor musunuz?', 'Hayır, ilan gösterimi ücretsizdir. Telefon veya WhatsApp ile randevu alabilirsiniz.'],
+  [`${ad}'deki mülkümü size verebilir miyim?`, 'Elbette. "Mülkünüzü Bize Verin" formunu doldurun veya bizi arayın; ücretsiz değerleme yapalım.']
+];
+const ILCE_TURLERI = [
+  ['satilik-ev', 'Satılık', KONUT, 'Satılık Ev', (ad) => `${ad}'de satılık ev mi arıyorsunuz? ${ad} bölgesindeki satılık daire, müstakil ev ve villa ilanlarımız aşağıda. Bizim Emlak 26 yıldır Osmaniye ve ilçelerinde güvenilir alım satım hizmeti veriyor.`],
+  ['kiralik-ev', 'Kiralık', KONUT, 'Kiralık Ev', (ad) => `${ad}'de kiralık ev ve kiralık daire ilanlarımız aşağıda. Eşyalı veya eşyasız, ailenize ve bütçenize uygun kiralık evi ${ad} bölgesinde birlikte bulalım.`],
+  ['satilik-arsa', 'Satılık', ['Arsa'], 'Satılık Arsa', (ad) => `${ad}'de konut imarlı, ticari veya yatırımlık satılık arsa arayanlar için güncel ilanlarımız aşağıda. İmar ve tapu durumu hakkında ayrıntılı bilgi veriyoruz.`]
+];
+for (const [ilce, on, ad] of ILCELER) {
+  for (const [son, tip, kat, tur, giris] of ILCE_TURLERI) {
+    SAYFALAR.push({
+      dosya: `${on}-${son}`, tip, kategoriler: kat, ilce, ek: true,
+      filtre: (i) => i.tip === tip && kat.includes(i.kategori) && (i.ilce || 'Merkez') === ilce,
+      baslik: `${ad} ${tur} İlanları`, kisa: `${ad} ${tur.toLocaleLowerCase('tr-TR')}`,
+      giris: giris(ad), sss: ilceSss(ad)
+    });
+  }
+}
+const odaSayisi = (i) => String(i.oda_sayisi || '').replace(/\s/g, '');
+for (const oda of ['1+1', '2+1', '3+1', '4+1']) {
+  for (const [tip, son] of [['Satılık', 'satilik'], ['Kiralık', 'kiralik']]) {
+    SAYFALAR.push({
+      dosya: `osmaniye-${son}-${oda.replace('+', '-')}-daire`, tip, kategoriler: ['Daire'], oda, ek: true,
+      filtre: (i) => i.tip === tip && i.kategori === 'Daire' && odaSayisi(i) === oda,
+      baslik: `Osmaniye ${tip} ${oda} Daire İlanları`, kisa: `Osmaniye ${tip.toLocaleLowerCase('tr-TR')} ${oda} daire`,
+      giris: `Osmaniye'de ${tip.toLocaleLowerCase('tr-TR')} ${oda} daire arayanlar için güncel ilanlarımız aşağıda. Mahalle, kat, bina yaşı ve fiyat bilgilerini her ilanda bulabilirsiniz.`,
+      sss: [
+        [`${oda} daire kaç metrekare olur?`, `Osmaniye'de ${oda} daireler binaya göre değişmekle birlikte genellikle ${{ '1+1': '55-75', '2+1': '85-110', '3+1': '115-150', '4+1': '150-200' }[oda]} m² arasındadır. Her ilanda brüt ve net metrekare yazılıdır.`],
+        ['Gösterim için ne yapmalıyım?', 'İlan sayfasındaki telefon veya WhatsApp butonuyla bize ulaşın, size uygun saatte gösterim ayarlayalım.'],
+        ['Aradığım daire listede yoksa?', '"Aradığım Evi Bildir" formunu doldurun; uygun daire geldiğinde sizi haber verelim.']
+      ]
+    });
+  }
+}
+SAYFALAR.push(
+  {
+    dosya: 'osmaniye-sifir-daire', tip: 'Satılık', kategoriler: ['Daire'], ek: true,
+    filtre: (i) => i.tip === 'Satılık' && i.kategori === 'Daire' && Number(i.bina_yasi) === 0 && i.bina_yasi !== null && i.bina_yasi !== '',
+    baslik: 'Osmaniye Sıfır Satılık Daire İlanları', kisa: 'Osmaniye sıfır daire',
+    giris: 'Osmaniye\'de yeni yapılmış, hiç oturulmamış sıfır satılık daire ilanlarımız aşağıda. Yeni binaların iskan, deprem yönetmeliği ve tapu durumu hakkında size ayrıntılı bilgi veriyoruz.',
+    sss: [
+      ['Sıfır daire alırken nelere dikkat etmeliyim?', 'İskanın alınmış olması, kat mülkiyetli tapu, müteahhidin güvenilirliği ve yapı denetim raporları kontrol edilmelidir.'],
+      ['Sıfır daire krediye uygun mu?', 'İskanı alınmış ve kat mülkiyetine geçmiş sıfır daireler genellikle konut kredisine uygundur.'],
+      ['Sıfır dairede KDV var mı?', 'Müteahhitten ilk satışta KDV uygulanır; oran metrekare ve bölgeye göre değişir. Ayrıntılar için mali müşavirinize danışın.']
+    ]
+  },
+  {
+    dosya: 'osmaniye-esyali-kiralik-daire', tip: 'Kiralık', kategoriler: ['Daire'], ek: true,
+    filtre: (i) => i.tip === 'Kiralık' && KONUT.includes(i.kategori) && i.esyali,
+    baslik: 'Osmaniye Eşyalı Kiralık Daire İlanları', kisa: 'Osmaniye eşyalı kiralık daire',
+    giris: 'Osmaniye\'de eşyalı kiralık daire ve ev arayan öğrenciler, çalışanlar ve aileler için güncel ilanlarımız aşağıda. Taşınma derdi olmadan hemen oturabileceğiniz evleri birlikte bulalım.',
+    sss: [
+      ['Eşyalı evde hangi eşyalar olur?', 'Genellikle temel mobilya ve beyaz eşya bulunur; ayrıntılar her ilanda ve gösterimde netleşir.'],
+      ['Öğrenciye uygun eşyalı daire var mı?', 'Osmaniye Korkut Ata Üniversitesi\'ne yakın eşyalı daireler için bizi arayabilirsiniz.'],
+      ['Eşyalı evde depozito farklı mı?', 'Depozito yasal olarak en fazla üç aylık kira kadar olabilir; eşyalı evlerde teslim tutanağı ayrıca önemlidir.']
+    ]
+  },
+  {
+    dosya: 'osmaniye-krediye-uygun-satilik-daire', tip: 'Satılık', kategoriler: ['Daire'], ek: true,
+    filtre: (i) => i.tip === 'Satılık' && KONUT.includes(i.kategori) && i.krediye_uygun,
+    baslik: 'Osmaniye Krediye Uygun Satılık Daire İlanları', kisa: 'Osmaniye krediye uygun daire',
+    giris: 'Osmaniye\'de konut kredisiyle alınabilecek satılık daire ve ev ilanlarımız aşağıda. Kredi başvurusu ve ekspertiz sürecinde size yol gösteriyoruz.',
+    sss: [
+      ['Krediye uygun ne demek?', 'Evin iskanlı ve kat mülkiyetli olması gibi bankaların aradığı şartları taşıdığı anlamına gelir. Kesin onay bankanın ekspertizine bağlıdır.'],
+      ['Kredi onayını kim verir?', 'Kredi onayını banka verir. Biz evin belgelerinin hazır olmasına yardımcı oluruz.'],
+      ['Peşinat ne kadar olmalı?', 'Bankalar evin ekspertiz değerinin bir kısmını kredilendirir; kalan kısmı peşinat olarak ödenir. Güncel oranları bankanıza sorun.']
+    ]
+  },
+  {
+    dosya: 'osmaniye-site-icinde-satilik-daire', tip: 'Satılık', kategoriler: ['Daire'], ek: true,
+    filtre: (i) => i.tip === 'Satılık' && KONUT.includes(i.kategori) && i.site_icinde,
+    baslik: 'Osmaniye Site İçinde Satılık Daire İlanları', kisa: 'Osmaniye site içinde daire',
+    giris: 'Osmaniye\'de güvenlikli, otoparklı ve sosyal alanlı site içinde satılık daire ilanlarımız aşağıda. Ailenizle huzurlu bir yaşam için site seçeneklerini birlikte değerlendirelim.',
+    sss: [
+      ['Site aidatları ne kadar?', 'Aidat sitenin imkanlarına göre değişir; her ilanda aidat bilgisi yer alır.'],
+      ['Sitede güvenlik var mı?', 'Sitelerin güvenlik, otopark ve sosyal alan bilgilerini gösterim sırasında ayrıntılı anlatıyoruz.'],
+      ['Site içinde kiralık daire de var mı?', 'Kiralık ilanlarımız için Osmaniye Kiralık Daire sayfamıza bakabilirsiniz.']
+    ]
+  },
+  {
+    dosya: 'osmaniye-satilik-mustakil-ev', tip: 'Satılık', kategoriler: ['Müstakil Ev'], ek: true,
+    baslik: 'Osmaniye Satılık Müstakil Ev İlanları', kisa: 'Osmaniye satılık müstakil ev',
+    giris: 'Osmaniye ve ilçelerinde bahçeli satılık müstakil ev ilanlarımız aşağıda. Toprağa basan, bahçeli bir ev arayanlar için seçenekleri birlikte değerlendirelim.',
+    sss: [
+      ['Müstakil ev alırken nelere dikkat edilmeli?', 'Tapu türü (kat mülkiyeti, arsa tapusu), iskan, imar durumu ve yapının durumu kontrol edilmelidir.'],
+      ['Müstakil ev krediyle alınabilir mi?', 'İskanlı ve tapusu uygun müstakil evler konut kredisiyle alınabilir.'],
+      ['Köy evi ilanınız var mı?', 'İlçe ve köylerdeki müstakil ev talepleriniz için bizi arayabilirsiniz.']
+    ]
+  },
+  {
+    dosya: 'osmaniye-satilik-dukkan', tip: 'Satılık', kategoriler: ['Dükkan', 'Ofis'], ek: true,
+    baslik: 'Osmaniye Satılık Dükkan ve Ofis İlanları', kisa: 'Osmaniye satılık dükkan',
+    giris: 'Osmaniye\'de yatırım veya kendi işiniz için satılık dükkan ve satılık ofis ilanlarımız aşağıda. Kira getirisi ve konum değerlendirmesinde size yardımcı oluyoruz.',
+    sss: [
+      ['Kiracılı dükkan satışı yapıyor musunuz?', 'Evet, kiracılı dükkanlarda mevcut kira ve sözleşme bilgilerini ilan özelinde paylaşıyoruz.'],
+      ['Dükkan yatırımında nelere bakılmalı?', 'Cadde konumu, yaya trafiği, cephe genişliği, tapu türü ve kira getirisi en önemli kriterlerdir.'],
+      ['Ofis olarak kullanılabilecek yerler var mı?', 'Evet, ofis kategorisindeki satılık ilanlarımız da bu sayfada listelenir.']
+    ]
+  },
+  {
+    dosya: 'osmaniye-kiralik-arsa-tarla', tip: 'Kiralık', kategoriler: ['Arsa', 'Tarla'], ek: true,
+    baslik: 'Osmaniye Kiralık Arsa ve Tarla İlanları', kisa: 'Osmaniye kiralık arsa',
+    giris: 'Osmaniye\'de kiralık arsa ve tarla ilanlarımız aşağıda. Tarım, depolama veya işyeri amaçlı kiralama için uygun yerleri birlikte bulalım.',
+    sss: [
+      ['Tarla kiralama nasıl yapılır?', 'Tapu sahibiyle yazılı kira sözleşmesi yapılır; süre, bedel ve kullanım şekli sözleşmede belirtilir.'],
+      ['Arsamı kiraya verebilir miyim?', 'Elbette. "Mülkünüzü Bize Verin" formunu doldurun veya bizi arayın.'],
+      ['Kira bedeli nasıl belirlenir?', 'Konum, büyüklük, yola yakınlık ve su/elektrik durumuna göre belirlenir.']
+    ]
+  }
+);
+
 /* ---------- Yardımcılar ---------- */
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const slug = (t) => String(t || '').toLocaleLowerCase('tr-TR')
@@ -115,7 +237,7 @@ const BAS = (o) => `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(o.title)}</title>
 <meta name="description" content="${esc(o.description)}">
-<link rel="canonical" href="${SITE}/${o.yol}">
+<link rel="canonical" href="${SITE}/${o.yol}">${o.noindex ? '\n<meta name="robots" content="noindex,follow">' : ''}
 <meta property="og:type" content="website">
 <meta property="og:url" content="${SITE}/${o.yol}">
 <meta property="og:title" content="${esc(o.title)}">
@@ -214,9 +336,12 @@ function ilanSayfasi(i, ayar) {
 }
 
 /* ---------- Arama sayfası ---------- */
+const eslesen = (s, ilanlar) => ilanlar.filter((i) => aktifMi(i) && (s.filtre ? s.filtre(i) : (i.tip === s.tip && s.kategoriler.includes(i.kategori))));
+const acikMi = (s, ilanlar) => !s.ek || eslesen(s, ilanlar).length > 0;
 function aramaSayfasi(s, ilanlar, tumSayfalar) {
-  const l = ilanlar.filter((i) => aktifMi(i) && i.tip === s.tip && s.kategoriler.includes(i.kategori));
-  const filtre = `ilanlar.html?tip=${encodeURIComponent(s.tip)}&kategori=${encodeURIComponent(s.kategoriler.join(','))}`;
+  const l = eslesen(s, ilanlar);
+  const filtre = `ilanlar.html?tip=${encodeURIComponent(s.tip)}&kategori=${encodeURIComponent(s.kategoriler.join(','))}${s.ilce ? '&ilce=' + encodeURIComponent(s.ilce) : ''}${s.oda ? '&oda=' + encodeURIComponent(s.oda) : ''}`;
+  const kapali = s.ek && !l.length;
   const ilceler = [...new Set(l.map((i) => i.ilce).filter(Boolean))];
   const fiyatlar = l.map((i) => Number(i.fiyat)).filter((x) => x > 0);
   const ozet = l.length
@@ -233,7 +358,7 @@ function aramaSayfasi(s, ilanlar, tumSayfalar) {
       { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: SITE + '/' },
       { '@type': 'ListItem', position: 2, name: s.baslik, item: `${SITE}/${s.dosya}.html` }]
   }];
-  return BAS({ title: `${s.baslik} | Bizim Emlak`, description: kisa(`${s.baslik}: ${s.giris}`, 155), yol: `${s.dosya}.html`, ld }) + `
+  return BAS({ title: `${s.baslik} | Bizim Emlak`, description: kisa(`${s.baslik}: ${s.giris}`, 155), yol: `${s.dosya}.html`, ld, noindex: kapali }) + `
 <main>
   <section class="sayfa-bas">
     <div class="kap">
@@ -254,7 +379,7 @@ function aramaSayfasi(s, ilanlar, tumSayfalar) {
       <h2>Sık Sorulan Sorular</h2>
       <dl class="terim">${s.sss.map(([q, a]) => `<dt>${esc(q)}</dt><dd>${esc(a)}</dd>`).join('')}</dl>
       <h2>Diğer Aramalar</h2>
-      <div class="etiket-linkler">${tumSayfalar.filter((x) => x.dosya !== s.dosya).map((x) => `<a class="cip" href="${x.dosya}.html">${esc(x.baslik.replace(' İlanları', ''))}</a>`).join('')}</div>
+      <div class="etiket-linkler">${tumSayfalar.filter((x) => x.dosya !== s.dosya && acikMi(x, ilanlar)).map((x) => `<a class="cip" href="${x.dosya}.html">${esc(x.baslik.replace(' İlanları', ''))}</a>`).join('')}</div>
     </div>
   </section>
   <section class="bolum">
@@ -284,9 +409,12 @@ export async function calistir(veri) {
     if (/^ilan-\d+-.*\.html$/.test(f) && !yeniler.has(f)) unlinkSync(join(KOK, f));
   }
   for (const i of ilanlar) writeFileSync(join(KOK, ilanUrl(i)), ilanSayfasi(i, ayar));
+  for (const f of readdirSync(KOK)) {
+    if (/^(osmaniye|kadirli|duzici|bahce|toprakkale|hasanbeyli|sumbas)-.*\.html$/.test(f) && !SAYFALAR.some((s) => `${s.dosya}.html` === f)) unlinkSync(join(KOK, f));
+  }
   for (const s of SAYFALAR) writeFileSync(join(KOK, `${s.dosya}.html`), aramaSayfasi(s, ilanlar, SAYFALAR));
 
-  const sabit = [['', '1.0', 'daily'], ['ilanlar.html', '0.9', 'daily'], ...SAYFALAR.map((s) => [`${s.dosya}.html`, '0.9', 'daily']),
+  const sabit = [['', '1.0', 'daily'], ['ilanlar.html', '0.9', 'daily'], ...SAYFALAR.filter((s) => acikMi(s, ilanlar)).map((s) => [`${s.dosya}.html`, s.ek ? '0.8' : '0.9', 'daily']),
     ['iletisim.html', '0.7', 'monthly'], ['hakkimizda.html', '0.6', 'monthly'], ['rehber.html', '0.6', 'monthly'], ['kvkk.html', '0.2', 'yearly']];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -295,7 +423,7 @@ ${ilanlar.filter(aktifMi).map((i) => `  <url><loc>${SITE}/${ilanUrl(i)}</loc><la
 </urlset>
 `;
   writeFileSync(join(KOK, 'sitemap.xml'), xml);
-  console.log(`${ilanlar.length} ilan sayfası (${ilanlar.filter(aktifMi).length} aktif), ${SAYFALAR.length} arama sayfası ve sitemap.xml üretildi.`);
+  console.log(`${ilanlar.length} ilan sayfası (${ilanlar.filter(aktifMi).length} aktif), ${SAYFALAR.length} arama sayfası (${SAYFALAR.filter((s) => acikMi(s, ilanlar)).length} Google'a açık) ve sitemap.xml üretildi.`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
