@@ -129,7 +129,7 @@
         <div class="butonlar">
           ${aramaTel ? `<a class="btn btn-kirmizi btn-blok" href="${BE.telLink(aramaTel)}">${ikon('telefon')} ${esc(aramaTel)}</a>` : ''}
           ${wpNo ? `<a class="btn btn-wp btn-blok" target="_blank" rel="noopener" href="${BE.wpLink(wpNo, wpMesaj)}">${BE.WP_SVG.replace('<svg', '<svg class="ikon" style="fill:currentColor"')} WhatsApp'tan Sor</a>` : ''}
-          ${sahibindenLink ? `<a class="btn btn-sahibinden btn-blok" target="_blank" rel="noopener" href="${esc(sahibindenLink)}">${ikon('dukkan')} sahibinden.com Tüm İlanlarımız</a>` : ''}
+          ${sahibindenLink ? `<a class="btn btn-sahibinden btn-blok" target="_blank" rel="noopener" href="${esc(sahibindenLink)}"><img class="sahibinden-logo" src="images/sahibinden.png" alt="" width="22" height="22"> sahibinden.com Tüm İlanlarımız</a>` : ''}
           ${dn && dn.telefon && a.telefon && dn.telefon !== a.telefon ? `<span class="ofis-tel">Ofis: <a href="${BE.telLink(a.telefon)}">${esc(a.telefon)}</a></span>` : ''}
           <div class="satir-btn">
             <button type="button" class="btn btn-cizgi btn-kucuk fav-btn-detay" id="fav-detay">${ikon('kalp')} <span>${fav ? 'Favoride' : 'Favorile'}</span></button>

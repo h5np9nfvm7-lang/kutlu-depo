@@ -523,3 +523,4 @@ table.tablo { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .ofis-tel { display: block; text-align: center; font-size: .85rem; color: var(--metin-soluk); margin-top: 2px; }
 .btn-sahibinden { background: #ffe800; color: #111; border-color: #ffe800; }
 .btn-sahibinden:hover { background: #f2dc00; color: #111; }
+.sahibinden-logo { width: 22px; height: 22px; border-radius: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,.15); flex: none; }
