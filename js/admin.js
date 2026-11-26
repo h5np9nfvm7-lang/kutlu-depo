@@ -319,16 +319,10 @@
     if ($('#filigran').checked) {
       try {
         const logo = await logoYukle();
-        // Arka plansız, küçük logo (fotoğrafın %14'ü). Net görünsün diye tam opak çizilir ve
-        // etrafına ince, keskin beyaz kontur eklenir (koyu zeminde de okunur, bulanık parlama yok).
+        // Arka plansız, kenarsız, küçük logo (fotoğrafın %14'ü); net görünsün diye tam opak ve yüksek kalitede çizilir
         const lw = Math.round(c.width * 0.14), lh = Math.round(lw * logo.height / logo.width), pay = Math.round(c.width * 0.02);
-        const lx = c.width - lw - pay, ly = c.height - lh - pay, k = Math.max(1, Math.round(lw / 110));
-        const ak = document.createElement('canvas'); ak.width = lw; ak.height = lh;
-        const ax = ak.getContext('2d'); ax.imageSmoothingQuality = 'high'; ax.drawImage(logo, 0, 0, lw, lh);
-        ax.globalCompositeOperation = 'source-in'; ax.fillStyle = '#fff'; ax.fillRect(0, 0, lw, lh);
-        for (let dx = -k; dx <= k; dx++) for (let dy = -k; dy <= k; dy++) if (dx || dy) x.drawImage(ak, lx + dx, ly + dy);
         x.imageSmoothingQuality = 'high';
-        x.drawImage(logo, lx, ly, lw, lh);
+        x.drawImage(logo, c.width - lw - pay, c.height - lh - pay, lw, lh);
       } catch (e) { console.warn('Logo eklenemedi', e); }
     }
     let blob = await new Promise((coz) => c.toBlob(coz, 'image/webp', 0.9));
