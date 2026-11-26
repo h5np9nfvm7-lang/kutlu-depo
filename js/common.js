@@ -188,13 +188,15 @@
     if (secenek.limit) q = q.limit(secenek.limit);
     const { data, error } = await q;
     if (error) throw error;
-    return data || [];
+    return (data || []).filter(BE.yetkiVar);
   };
+  // Yasal zorunluluk: yetki belge numarası girilmemiş ilan sitede yayınlanmaz
+  BE.yetkiVar = (i) => !!(i && String(i.yetki_no || '').trim());
   BE.ilan = async function (id) {
     if (!BE.db) throw new Error('Veritabanı bağlantısı kurulamadı.');
     const { data, error } = await BE.db.from('ilanlar').select('*').eq('id', Number(id)).eq('yayinda', true).maybeSingle();
     if (error) throw error;
-    return data;
+    return BE.yetkiVar(data) ? data : null;
   };
 
   /* ---------- İlan kartı ---------- */

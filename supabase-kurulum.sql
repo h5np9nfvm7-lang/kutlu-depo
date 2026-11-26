@@ -327,3 +327,11 @@ where not exists (select 1 from public.ilanlar);
 -- Panelde eski mesajları görmeye ve silmeye devam edebilirsiniz.
 -- ===========================================================
 drop policy if exists "mesaj gonderme" on public.mesajlar;
+
+-- ===========================================================
+-- Yetki belge numarası (Taşınmaz Ticareti Yönetmeliği: ilanlarda zorunlu).
+-- Numarası girilmemiş ilan sitede gösterilmez.
+-- ===========================================================
+alter table public.ilanlar add column if not exists yetki_no text;
+alter table public.ilanlar drop constraint if exists ilanlar_yetki_no_uzunluk;
+alter table public.ilanlar add constraint ilanlar_yetki_no_uzunluk check (yetki_no is null or char_length(yetki_no) <= 50);

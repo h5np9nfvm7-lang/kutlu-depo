@@ -203,7 +203,7 @@
         <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
           <button type="button" class="durum-btn ${i.yayinda ? 'acik' : ''}" data-degistir="yayinda" data-id="${i.id}">${i.yayinda ? '● Yayında' : '○ Yayında değil'}</button>
           <button type="button" class="durum-btn ${i.one_cikan ? 'one' : ''}" data-degistir="one_cikan" data-id="${i.id}">${i.one_cikan ? '★ Öne çıkan' : '☆ Öne çıkar'}</button>
-          ${durumEtiketi(i)}</div></td>
+          ${durumEtiketi(i)}${i.yetki_no ? '' : '<span class="durum-btn" style="color:var(--kirmizi);border-color:var(--kirmizi)" title="Yetki belge no girilmediği için sitede görünmüyor">⚠ Yetki no yok · sitede görünmüyor</span>'}</div></td>
         <td class="islemler-td"><div class="islemler">
           <a class="btn btn-siyah btn-kucuk" href="#duzenle-${i.id}">Düzenle</a>
           <a class="btn btn-cizgi btn-kucuk" href="ilan.html?id=${i.id}" target="_blank" ${i.yayinda ? '' : 'style="display:none"'}>Gör</a>
@@ -440,6 +440,8 @@
     PARA.forEach((n) => { form[n].value = i && i[n] != null ? BE.sayi(i[n]) : ''; });
     BAYRAK.forEach((n) => { form[n].checked = i ? !!i[n] : n === 'yayinda'; });
     form.video_url.value = (i && i.video_url) || '';
+    let sonYetki = ''; try { sonYetki = localStorage.getItem('be_yetki_no') || ''; } catch (e) {}
+    form.yetki_no.value = i ? (i.yetki_no || '') : sonYetki;
     form.sanal_tur_url.value = (i && i.sanal_tur_url) || '';
     form.enlem.value = i && i.enlem != null ? i.enlem : '';
     form.boylam.value = i && i.boylam != null ? i.boylam : '';
@@ -463,15 +465,16 @@
     v.enlem = isNaN(la) ? null : la; v.boylam = isNaN(lo) ? null : lo;
     v.tip = tip; v.il = v.il || 'Osmaniye'; v.kategori = v.kategori || 'Daire'; v.durum = v.durum || 'Aktif';
     v.resimler = fotolar; v.ozellikler = etiketler;
-    ['video_url', 'sanal_tur_url'].forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
+    ['video_url', 'sanal_tur_url', 'yetki_no'].forEach((n) => { const x = form[n].value.trim(); v[n] = x || null; });
 
     const hatalar = [];
     if (!v.baslik || v.baslik.length < 3) hatalar.push('başlık');
     if (v.fiyat === null) hatalar.push('fiyat');
+    if (!v.yetki_no) hatalar.push('yetki belge no');
     if ((v.video_url && !/^https:\/\//i.test(v.video_url)) || (v.sanal_tur_url && !/^https:\/\//i.test(v.sanal_tur_url))) hatalar.push('video/sanal tur linki "https://" ile başlamalı');
     if (hatalar.length) {
       $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Lütfen doldurun: ${hatalar.join(', ')}</span>`;
-      (v.baslik ? form.fiyat : form.baslik).focus(); return;
+      (!v.baslik ? form.baslik : v.fiyat === null ? form.fiyat : form.yetki_no).focus(); return;
     }
     const btn = $('#kaydet-btn'); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
     try {
@@ -485,13 +488,14 @@
         if (error) throw error; kayit = data;
         ilanlar.unshift(kayit);
       }
+      try { localStorage.setItem('be_yetki_no', v.yetki_no); } catch (e) {}
       fotoSil(silinecekFotolar); silinecekFotolar = [];
       kirli = false;
       BE.bildirim(duzenlenen ? 'İlan güncellendi' : 'İlan eklendi');
       location.hash = 'ilanlar';
     } catch (err) {
       console.error(err);
-      $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Kaydedilemedi: ${esc(hataMetni(err))}</span>`;
+      $('#form-durum').innerHTML = `<span style="color:var(--kirmizi);font-weight:700">Kaydedilemedi: ${/yetki_no/.test(String(err && (err.message || err))) ? 'Veritabanında yetki numarası alanı henüz yok. Supabase SQL Editor\'de kurulum satırını çalıştırın.' : esc(hataMetni(err))}</span>`;
     }
     btn.disabled = false; btn.textContent = 'İlanı Kaydet';
   });

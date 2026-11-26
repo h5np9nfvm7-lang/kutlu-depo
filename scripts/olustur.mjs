@@ -16,7 +16,7 @@ const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://bizimemlak.biz';
 const SUPABASE_URL = 'https://zcfdiskphrmwdxqnexio.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_085SzLY-pef-AHq6-qnBbQ_9MKLb2Mb';
-const SURUM = 'v=11';
+const SURUM = 'v=12';
 
 /* ---------- Arama sayfaları ---------- */
 const SAYFALAR = [
@@ -283,7 +283,7 @@ const kart = (i) => {
 function ilanSayfasi(i, ayar) {
   const resim = (i.resimler || [])[0];
   const satir = [
-    ['İlan No', '#' + i.id], ['İlan Tipi', i.tip], ['Kategori', i.kategori], ['Fiyat', fiyat(i)],
+    ['İlan No', '#' + i.id], ['Yetki Belge No', i.yetki_no], ['İlan Tipi', i.tip], ['Kategori', i.kategori], ['Fiyat', fiyat(i)],
     ['Konum', konum(i)], ['Brüt m²', i.brut_m2], ['Net m²', i.net_m2], ['Oda Sayısı', i.oda_sayisi],
     ['Banyo Sayısı', i.banyo_sayisi], ['Bina Yaşı', i.bina_yasi], ['Bulunduğu Kat', i.bulundugu_kat],
     ['Kat Sayısı', i.kat_sayisi], ['Isıtma', i.isitma], ['Tapu Durumu', i.tapu_durumu], ['İmar Durumu', i.imar_durumu],
@@ -313,6 +313,7 @@ function ilanSayfasi(i, ayar) {
       <h1 style="font-size:clamp(1.4rem,3vw,2rem)">${esc(i.baslik)}</h1>
       <p class="kart-konum">${esc(konum(i))}</p>
       <p class="detay-fiyat">${esc(fiyat(i))}</p>
+      <p class="ilan-no">İlan No: #${i.id} · Yetki Belge No: ${esc(i.yetki_no)}</p>
       ${resim ? `<img src="${esc(resim)}" alt="${esc(i.baslik)}" style="max-width:100%;border-radius:10px">` : ''}
       <div class="kart-blok"><h2>İlan Bilgileri</h2><dl class="bilgi-tablo">${satir.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></div>
       ${i.aciklama ? `<div class="kart-blok"><h2>Açıklama</h2><div class="aciklama-metin">${esc(i.aciklama)}</div></div>` : ''}
@@ -397,7 +398,9 @@ async function getir(yol) {
 }
 
 export async function calistir(veri) {
-  const ilanlar = veri?.ilanlar ?? await getir('ilanlar?select=*&yayinda=eq.true&order=created_at.desc');
+  // Yetki belge numarası girilmemiş ilanlar yayınlanmaz (yasal zorunluluk)
+  const ilanlar = (veri?.ilanlar ?? await getir('ilanlar?select=*&yayinda=eq.true&order=created_at.desc'))
+    .filter((i) => String(i.yetki_no || '').trim());
   const ayarSatir = veri?.ayar ?? (await getir('site_ayarlari?select=veri&id=eq.1'))[0];
   const ayar = Object.assign({ telefon: '0328 812 00 00' }, ayarSatir?.veri || {});
 

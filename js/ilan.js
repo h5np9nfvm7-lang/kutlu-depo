@@ -36,7 +36,7 @@
   const resimler = (i.resimler || []).filter(Boolean);
   const evetHayir = (v) => v ? `<span class="evet">${ikon('tik')} Var</span>` : '<span class="hayir">Yok</span>';
   const satirlar = [
-    ['İlan No', '#' + i.id], ['İlan Tarihi', BE.tarih(i.created_at)], ['İlan Tipi', i.tip], ['Kategori', i.kategori],
+    ['İlan No', '#' + i.id], ['Yetki Belge No', i.yetki_no], ['İlan Tarihi', BE.tarih(i.created_at)], ['İlan Tipi', i.tip], ['Kategori', i.kategori],
     ['Brüt m²', i.brut_m2 && BE.sayi(i.brut_m2) + ' m²'], ['Net m²', i.net_m2 && BE.sayi(i.net_m2) + ' m²'],
     ['Oda Sayısı', i.oda_sayisi], ['Banyo Sayısı', i.banyo_sayisi], ['Bina Yaşı', i.bina_yasi != null ? (i.bina_yasi === 0 ? 'Sıfır' : i.bina_yasi) : ''],
     ['Bulunduğu Kat', i.bulundugu_kat], ['Kat Sayısı', i.kat_sayisi], ['Isıtma', i.isitma],
@@ -85,7 +85,7 @@
         <h1 style="font-size:clamp(1.4rem,3vw,2rem)">${esc(i.baslik)}</h1>
         <div class="kart-konum" style="font-size:1rem">${ikon('konum')} ${esc(konum)}</div>
         <div class="detay-fiyat">${BE.fiyat(i)}</div>
-        <div class="ilan-no">İlan No: #${i.id} · ${BE.tarih(i.created_at)} · ${ikon('goz')} ${BE.sayi((i.goruntulenme || 0) + 1)} görüntülenme</div>
+        <div class="ilan-no">İlan No: #${i.id} · Yetki Belge No: ${esc(i.yetki_no)} · ${BE.tarih(i.created_at)} · ${ikon('goz')} ${BE.sayi((i.goruntulenme || 0) + 1)} görüntülenme</div>
       </div>
 
       <div class="kart-blok"><h2>İlan Bilgileri</h2>
